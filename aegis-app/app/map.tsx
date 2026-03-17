@@ -1,6 +1,6 @@
-
-import { useCallback, useEffect, useRef } from 'react';
-import MapView, { UrlTile } from 'react-native-maps';
+import { useCallback, useRef, useState } from 'react';
+import { Platform } from 'react-native';
+import MapView, { LatLng, LongPressEvent, Marker, UrlTile } from 'react-native-maps';
 
 /*
 Current maptile server hosted on https://map.burntheatlantic.com/ using https://github.com/Overv/openstreetmap-tile-server/
@@ -18,7 +18,23 @@ const EMPTY_MAP_STYLE = [
   { featureType: 'transit', stylers: [{ visibility: 'off' }] },
   { featureType: 'water', stylers: [{ visibility: 'off' }] },
 ];
+type DestinationMarker = {
+    id: number,
+    latlng: LatLng,
+    title: string
+}
 const BrumMap = () => {
+    const [uniqueMarker, setUniqueMarker] = useState<DestinationMarker | null> (null)
+    const setMarker = (e: LongPressEvent) => {
+        const latlng = e.nativeEvent.coordinate;
+        setUniqueMarker({
+            id: 0,
+            latlng: latlng,
+            title: "Destination"
+        })
+    }
+
+
     const mapRef = useRef<MapView | null>(null);
     const BrumBounds = {
         sw: {latitude: 52.460439, longitude: -1.928328},
@@ -35,8 +51,16 @@ const BrumMap = () => {
     const onMapReady = useCallback(async () => {
         const map = mapRef.current;
         if(!map) return;
-        await map.setMapBoundaries(BrumBounds.ne, BrumBounds.sw);
+        if(Platform.OS == "android")
+            map.setMapBoundaries(BrumBounds.ne, BrumBounds.sw);
     }, [])
+    // function SpawnAnchor(coordinates : LatLng){
+    //     return (<Marker 
+    //         coordinate={coordinates}
+    //         draggable
+    //         title='Destination'
+    //     />)
+    // }
     return(
         <MapView
             ref={mapRef}
@@ -49,9 +73,16 @@ const BrumMap = () => {
                 latitudeDelta: 0.0174604,
             }}
             onMapReady={onMapReady}
+            onLongPress={setMarker}
         //    cameraZoomRange={{}} 
         >
             <UrlTile urlTemplate='https://map.burntheatlantic.com/tile/{z}/{x}/{y}.png'/>
+            {uniqueMarker && (<Marker
+                key={uniqueMarker.id}
+                coordinate={uniqueMarker.latlng}
+                title={uniqueMarker.title}
+            />)}
+
         </MapView>
     );
 }
@@ -86,3 +117,4 @@ const BrumMap = () => {
 //     map:{...StyleSheet.absoluteFillObject}
 // });
 export default BrumMap;
+
