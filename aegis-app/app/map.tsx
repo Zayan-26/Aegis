@@ -1,120 +1,165 @@
-import { useCallback, useRef, useState } from 'react';
-import { Platform } from 'react-native';
-import MapView, { LatLng, LongPressEvent, Marker, Region, UrlTile } from 'react-native-maps';
+import React, { useCallback, useRef, useState } from "react";
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from "react-native";
+import MapView, { LatLng, LongPressEvent, MapPressEvent, Marker, Region, UrlTile } from "react-native-maps";
+import { Picker } from "@react-native-picker/picker";
+import { fetchNearbyPois, Poi, poiLabel } from "./scripts/apis/poiApi";
 
-/*
-Current maptile server hosted on https://map.burntheatlantic.com/ using https://github.com/Overv/openstreetmap-tile-server/
-Using osm.pbf originally downloaded from https://download.geofabrik.de/europe/united-kingdom.html and extracted using https://github.com/openmaptiles/openmaptiles-tools/
-Bounding Box for generated map created using https://boundingbox.klokantech.com/
-Bounds(CSV): -1.928328,52.460439,-1.871856,52.49536
-Custom POI  
-*/
-// const EMPTY_MAP_STYLE = [
-//   { elementType: 'geometry', stylers: [{ color: '#000000' }, { visibility: 'off' }] },
-//   { elementType: 'labels', stylers: [{ visibility: 'off' }] },
-//   { featureType: 'administrative', stylers: [{ visibility: 'off' }] },
-//   { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-//   { featureType: 'road', stylers: [{ visibility: 'off' }] },
-//   { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-//   { featureType: 'water', stylers: [{ visibility: 'off' }] },
-// ];
 type DestinationMarker = {
-    id: number,
-    latlng: LatLng,
-    title: string
-}
-const BrumMap = () => {
-    const [uniqueMarker, setUniqueMarker] = useState<DestinationMarker | null>(null)
-    const setMarker = (e: LongPressEvent) => {
-        const latlng = e.nativeEvent.coordinate;
-        setUniqueMarker({
-            id: 0,
-            latlng: latlng,
-            title: "Destination"
-        })
+  id: number;
+  latlng: LatLng;
+  title: string;
+};
+
+const TILE_URL = "https://map.burntheatlantic.com/tile/{z}/{x}/{y}.png";
+
+const INITIAL_REGION: Region = {
+  latitude: 52.4778995,
+  longitude: -1.900092,
+  latitudeDelta: 0.0174604,
+  longitudeDelta: 0.028236,
+};
+
+export default function BrumMap() {
+  const mapRef = useRef<MapView | null>(null);
+
+  const [destination, setDestination] = useState<DestinationMarker | null>(null);
+
+  const [pois, setPois] = useState<Poi[]>([]);
+  const [poisLoading, setPoisLoading] = useState(false);
+  const [poisError, setPoisError] = useState<string>("");
+
+  const [selectedPoiId, setSelectedPoiId] = useState<string>("");
+  const selectedPoi = pois.find((p) => String(p.osm_id) === selectedPoiId) ?? null;
+
+  const onLongPress = useCallback(async (e: LongPressEvent) => {
+    const latlng = e.nativeEvent.coordinate;
+
+    setDestination({ id: 0, latlng, title: "Destination" });
+
+    setPois([]);
+    setSelectedPoiId("");
+    setPoisError("");
+    setPoisLoading(true);
+
+    try {
+      const data = await fetchNearbyPois(latlng.latitude, latlng.longitude);
+      setPois(data.slice(0, 5));
+    } catch (err: any) {
+      setPoisError(err?.message ?? "Failed to load POIs");
+    } finally {
+      setPoisLoading(false);
     }
+  }, []);
+  const onShortPress = useCallback(async (e: MapPressEvent) => {
+    setPois([]);
+    setSelectedPoiId("");
+    setPoisError("");
+    setPoisLoading(false);
+    setDestination(null)
+  }, [])
 
-    const mapRef = useRef<MapView | null>(null);
-    const BoundsCenter = [52.4778995, -1.900092]
-    const BoundsDelta = [0.0174605, 0.028236]
-    const BoundsRatio = 0.95
-    const BrumBounds = {
-        sw: { latitude: BoundsCenter[0] - BoundsDelta[0] * BoundsRatio, longitude: BoundsCenter[1] - BoundsDelta[1] * BoundsRatio },
-        ne: { latitude: BoundsCenter[0] + BoundsDelta[0] * BoundsRatio, longitude: BoundsCenter[1] + BoundsDelta[1] * BoundsRatio }
-    }
+  const onPickPoi = useCallback(
+    (poiId: string) => {
+      setSelectedPoiId(poiId);
+      const poi = pois.find((p) => String(p.osm_id) === poiId);
+      if (!poi || !mapRef.current) return;
 
-    //Taken and modified off https://github.com/react-native-maps/react-native-maps/discussions/4865
-    const androidClamp = useCallback(async () => {
-        const map = mapRef.current;
-        if (!map) return;
-        if (Platform.OS == "android")
-            map.setMapBoundaries(BrumBounds.ne, BrumBounds.sw);
-    }, [])
+      mapRef.current.animateToRegion(
+        {
+          latitude: poi.poi_lat,
+          longitude: poi.poi_lng,
+          latitudeDelta: 0.003,
+          longitudeDelta: 0.003,
+        },
+        250
+      );
+    },
+    [pois]
+  );
 
-    const iosClamp = useCallback((region: Region) => {
-        const map = mapRef.current;
-        if (Platform.OS !== 'ios' || !map) return;
+  return (
+    <View style={styles.container}>
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        mapType="none"
+        initialRegion={INITIAL_REGION}
+        onLongPress={onLongPress}
+        onPress={onShortPress}
+        minZoomLevel={16}
+        maxZoomLevel={19}
+        showsPointsOfInterest={false}
+      >
+        <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
 
-        const {
-            sw: { latitude: minLat, longitude: minLng },
-            ne: { latitude: maxLat, longitude: maxLng },
-        } = BrumBounds;
+        {destination && (
+          <Marker coordinate={destination.latlng} title={destination.title} pinColor="red" stopPropagation={true} />
+        )}
 
-        const halfLat = region.latitudeDelta / 2;
-        const halfLng = region.longitudeDelta / 2;
+        {selectedPoi && (
+          <Marker
+            coordinate={{ latitude: selectedPoi.poi_lat, longitude: selectedPoi.poi_lng }}
+            title={selectedPoi.name ?? "Selected POI"}
+            description={`${Math.round(selectedPoi.meters)}m away`}
+            pinColor="blue"
+          />
+        )}
+      </MapView>
 
-        const clampedLat = Math.min(maxLat - halfLat, Math.max(minLat + halfLat, region.latitude));
-        const clampedLng = Math.min(maxLng - halfLng, Math.max(minLng + halfLng, region.longitude));
+      <View style={styles.overlay}>
+        <Text style={styles.overlayTitle}>Nearby POIs</Text>
 
-        const boundsCenterLat = (minLat + maxLat) / 2;
-        const boundsCenterLng = (minLng + maxLng) / 2;
+        {!destination ? (
+          <Text>Long-press the map to choose a point.</Text>
+        ) : poisLoading ? (
+          <View style={styles.row}>
+            <ActivityIndicator />
+            <Text style={styles.rowText}>Loading…</Text>
+          </View>
+        ) : poisError ? (
+          <Text style={styles.error}>{poisError}</Text>
+        ) : pois.length === 0 ? (
+          <Text>No POIs found near that point.</Text>
+        ) : (
+          <View style={styles.pickerWrap}>
+            <Picker
+              selectedValue={selectedPoiId}
+              onValueChange={(value) => onPickPoi(String(value))}
+              mode={Platform.OS === "android" ? "dropdown" : "dialog"}
+            >
+              <Picker.Item label="Select a POI…" value="" />
+              {pois.slice(0, 20).map((p) => (
+                <Picker.Item color={"#000000"}key={p.osm_id} label={poiLabel(p)} value={String(p.osm_id)} />
+              ))}
+            </Picker>
+          </View>
+        )}
 
-        const safeLat = maxLat - halfLat < minLat + halfLat ? boundsCenterLat : clampedLat;
-        const safeLng = maxLng - halfLng < minLng + halfLng ? boundsCenterLng : clampedLng;
-
-        if (safeLat !== region.latitude || safeLng !== region.longitude) {
-            map.animateToRegion({ ...region, latitude: safeLat, longitude: safeLng }, 0);
-        }
-    }, []);
-
-    return (
-        <MapView
-            ref={mapRef}
-            style={{ flex: 1 }}
-            //Only works for IOS ROFL
-            mapType='none'
-            // customMapStyle={EMPTY_MAP_STYLE}
-            initialRegion={{
-                longitude: -1.900092,
-                longitudeDelta: 0.028236,
-                latitude: 52.4778995,
-                latitudeDelta: 0.0174604,
-            }}
-            onMapReady={androidClamp}
-            onLongPress={setMarker}
-            //Google maps only because whoever made this is deranged and could not figure out a unified solution
-            minZoomLevel={16}
-            maxZoomLevel={19}
-            //IOS
-            cameraZoomRange={{
-                minCenterCoordinateDistance: 250,
-                maxCenterCoordinateDistance: 2500
-            }}
-            onRegionChangeComplete={Platform.OS === 'ios' ? iosClamp : undefined}
-            showsPointsOfInterest={false}
-        >
-            <UrlTile
-                urlTemplate='https://map.burntheatlantic.com/tile/{z}/{x}/{y}.png'
-                shouldReplaceMapContent
-            />
-
-            {uniqueMarker && (<Marker
-                key={uniqueMarker.id}
-                coordinate={uniqueMarker.latlng}
-                title={uniqueMarker.title}
-            />)}
-        </MapView>
-    );
+      </View>
+    </View>
+  );
 }
-export default BrumMap;
 
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  map: { flex: 1 },
+  overlay: {
+    position: "absolute",
+    left: 12,
+    right: 12,
+    bottom: 12,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.95)",
+  },
+  overlayTitle: { fontWeight: "700", marginBottom: 8 },
+  error: { color: "#b00020" },
+  row: { flexDirection: "row", alignItems: "center" },
+  rowText: { marginLeft: 8 , color : "#000000"},
+  pickerWrap: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+});
