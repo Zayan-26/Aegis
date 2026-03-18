@@ -7,7 +7,7 @@ Current maptile server hosted on https://map.burntheatlantic.com/ using https://
 Using osm.pbf originally downloaded from https://download.geofabrik.de/europe/united-kingdom.html and extracted using https://github.com/openmaptiles/openmaptiles-tools/
 Bounding Box for generated map created using https://boundingbox.klokantech.com/
 Bounds(CSV): -1.928328,52.460439,-1.871856,52.49536
-Taken and modified off https://github.com/react-native-maps/react-native-maps/discussions/4865
+Custom POI  
 */
 // const EMPTY_MAP_STYLE = [
 //   { elementType: 'geometry', stylers: [{ color: '#000000' }, { visibility: 'off' }] },
@@ -34,7 +34,6 @@ const BrumMap = () => {
         })
     }
 
-
     const mapRef = useRef<MapView | null>(null);
     const BoundsCenter = [52.4778995, -1.900092]
     const BoundsDelta = [0.0174605, 0.028236]
@@ -43,24 +42,15 @@ const BrumMap = () => {
         sw: { latitude: BoundsCenter[0] - BoundsDelta[0] * BoundsRatio, longitude: BoundsCenter[1] - BoundsDelta[1] * BoundsRatio },
         ne: { latitude: BoundsCenter[0] + BoundsDelta[0] * BoundsRatio, longitude: BoundsCenter[1] + BoundsDelta[1] * BoundsRatio }
     }
-    // const BrumBounds = {
-    //     sw: { latitude: 52.460439, longitude: -1.928328 },
-    //     ne: { latitude: 52.49536, longitude: -1.871856 }
-    // };
-    // useEffect(() => {
-    //     if(mapRef.current){
-    //         mapRef.current.setMapBoundaries(
-    //             BrumBounds.ne,
-    //             BrumBounds.sw
-    //         );
-    //     }
-    // }, []);
+
+    //Taken and modified off https://github.com/react-native-maps/react-native-maps/discussions/4865
     const androidClamp = useCallback(async () => {
         const map = mapRef.current;
         if (!map) return;
         if (Platform.OS == "android")
             map.setMapBoundaries(BrumBounds.ne, BrumBounds.sw);
     }, [])
+
     const iosClamp = useCallback((region: Region) => {
         const map = mapRef.current;
         if (Platform.OS !== 'ios' || !map) return;
@@ -86,13 +76,7 @@ const BrumMap = () => {
             map.animateToRegion({ ...region, latitude: safeLat, longitude: safeLng }, 0);
         }
     }, []);
-    // function SpawnAnchor(coordinates : LatLng){
-    //     return (<Marker 
-    //         coordinate={coordinates}
-    //         draggable
-    //         title='Destination'
-    //     />)
-    // }
+
     return (
         <MapView
             ref={mapRef}
@@ -118,8 +102,6 @@ const BrumMap = () => {
             }}
             onRegionChangeComplete={Platform.OS === 'ios' ? iosClamp : undefined}
             showsPointsOfInterest={false}
-        // cameraZoomRange={}
-        //    cameraZoomRange={{}} 
         >
             <UrlTile
                 urlTemplate='https://map.burntheatlantic.com/tile/{z}/{x}/{y}.png'
@@ -131,39 +113,8 @@ const BrumMap = () => {
                 coordinate={uniqueMarker.latlng}
                 title={uniqueMarker.title}
             />)}
-
         </MapView>
     );
 }
-
-// export default function MapScreen() {
-//   return (
-//     <View style={styles.container}>
-//         <MapView
-//             style={styles.map}
-//             initialRegion={{
-//                 longitude: -1.900092,
-//                 longitudeDelta: 0.028236,
-//                 latitude: 52.4778995,
-//                 latitudeDelta: 0.0174604,
-//             }}>
-//                 <UrlTile
-//                     urlTemplate='http://map.burntheatlantic.com/{z}/{x}/{y}.png'
-//                 />
-//             </MapView>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//     container:{
-//         ...StyleSheet.absoluteFillObject,
-//         height: 400,
-//         width: 400,
-//         justifyContent: 'flex-end',
-//         alignItems: 'center',
-//     },
-//     map:{...StyleSheet.absoluteFillObject}
-// });
 export default BrumMap;
 
