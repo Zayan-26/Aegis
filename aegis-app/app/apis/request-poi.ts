@@ -1,3 +1,6 @@
+import { LatLng } from "react-native-maps";
+import { POI_ENDPOINT } from "./endpoints";
+
 export type Poi = {
   osm_id: number;
   name: string | null;
@@ -11,11 +14,13 @@ export type Poi = {
   meters: number;
 };
 
-export async function fetchNearbyPois(lat: number, lng: number): Promise<Poi[]> {
-  const res = await fetch("https://poi.burntheatlantic.com/rpc/nearby_pois", {
+//POI API hosted with https://github.com/PostgREST/postgrest
+
+export async function fetchNearbyPois(latlng: LatLng): Promise<Poi[]> {
+  const res = await fetch(POI_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ lat, lng }),
+    body: JSON.stringify(latlng),
   });
 
   if (!res.ok) {

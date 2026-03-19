@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Platform, StyleSheet, Text, View } from "react-native";
 import MapView, { LatLng, LongPressEvent, MapPressEvent, Marker, Region, UrlTile } from "react-native-maps";
 import { Picker } from "@react-native-picker/picker";
-import { fetchNearbyPois, Poi, poiLabel } from "./scripts/apis/request-poi";
+import { fetchNearbyPois, Poi, poiLabel } from "./apis/request-poi";
 
 type DestinationMarker = {
   id: number;
