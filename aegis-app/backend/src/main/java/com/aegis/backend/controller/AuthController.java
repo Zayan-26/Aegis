@@ -1,5 +1,7 @@
 package com.aegis.backend.controller;
 
+import com.aegis.backend.dto.AuthResponse;
+import com.aegis.backend.dto.LoginRequest;
 import com.aegis.backend.dto.RegisterRequest;
 import com.aegis.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -17,5 +19,11 @@ public class AuthController {
     public ResponseEntity<String> register(@RequestBody RegisterRequest request) {
         userService.register(request);
         return ResponseEntity.ok("User registered successfully");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        AuthResponse response = userService.login(request);
+        return ResponseEntity.ok(response);
     }
 }
