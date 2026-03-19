@@ -26,4 +26,16 @@ public class AuthController {
         AuthResponse response = userService.login(request);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/test-auth")
+    public ResponseEntity<String> testAuth() {
+        return ResponseEntity.ok("you are authenticated...");
+    }
+
+    @GetMapping("/whoami")
+    public ResponseEntity<String> whoAmI() {
+        return ResponseEntity.ok("IT WORKS");
+    }
+
+
 }
