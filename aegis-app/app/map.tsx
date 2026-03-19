@@ -1,120 +1,175 @@
-import { useCallback, useRef, useState } from 'react';
-import { Platform } from 'react-native';
-import MapView, { LatLng, LongPressEvent, Marker, UrlTile } from 'react-native-maps';
+import React, { useCallback, useRef, useState } from "react";
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from "react-native";
+import MapView, { LatLng, LongPressEvent, MapPressEvent, Marker, Region, UrlTile } from "react-native-maps";
+import { Picker } from "@react-native-picker/picker";
+import { fetchNearbyPois, Poi, poiLabel } from "./scripts/apis/poiApi";
 
-/*
-Current maptile server hosted on https://map.burntheatlantic.com/ using https://github.com/Overv/openstreetmap-tile-server/
-Using osm.pbf originally downloaded from https://download.geofabrik.de/europe/united-kingdom.html and extracted using https://github.com/openmaptiles/openmaptiles-tools/
-Bounding Box for generated map created using https://boundingbox.klokantech.com/
-Bounds(CSV): -1.928328,52.460439,-1.871856,52.49536
-Taken and modified off https://github.com/react-native-maps/react-native-maps/discussions/4865
-*/
-const EMPTY_MAP_STYLE = [
-  { elementType: 'geometry', stylers: [{ color: '#000000' }, { visibility: 'off' }] },
-  { elementType: 'labels', stylers: [{ visibility: 'off' }] },
-  { featureType: 'administrative', stylers: [{ visibility: 'off' }] },
-  { featureType: 'poi', stylers: [{ visibility: 'off' }] },
-  { featureType: 'road', stylers: [{ visibility: 'off' }] },
-  { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-  { featureType: 'water', stylers: [{ visibility: 'off' }] },
-];
 type DestinationMarker = {
-    id: number,
-    latlng: LatLng,
-    title: string
-}
-const BrumMap = () => {
-    const [uniqueMarker, setUniqueMarker] = useState<DestinationMarker | null> (null)
-    const setMarker = (e: LongPressEvent) => {
-        const latlng = e.nativeEvent.coordinate;
-        setUniqueMarker({
-            id: 0,
-            latlng: latlng,
-            title: "Destination"
-        })
+  id: number;
+  latlng: LatLng;
+  title: string;
+};
+
+const TILE_URL = "https://map.burntheatlantic.com/tile/{z}/{x}/{y}.png";
+
+const INITIAL_REGION: Region = {
+  latitude: 52.4778995,
+  longitude: -1.900092,
+  latitudeDelta: 0.0174604,
+  longitudeDelta: 0.028236,
+};
+
+export default function BrumMap() {
+  const mapRef = useRef<MapView | null>(null);
+
+  const [destination, setDestination] = useState<DestinationMarker | null>(null);
+
+  const [pois, setPois] = useState<Poi[]>([]);
+  const [poisLoading, setPoisLoading] = useState(false);
+  const [poisError, setPoisError] = useState<string>("");
+
+  const [selectedPoiId, setSelectedPoiId] = useState<string>("");
+  const selectedPoi = pois.find((p) => String(p.osm_id) === selectedPoiId) ?? null;
+
+  const onLongPress = useCallback(async (e: LongPressEvent) => {
+    const latlng = e.nativeEvent.coordinate;
+
+    setDestination({ id: 0, latlng, title: "Destination" });
+
+    setPois([]);
+    setSelectedPoiId("");
+    setPoisError("");
+    setPoisLoading(true);
+
+    try {
+      const data = await fetchNearbyPois(latlng.latitude, latlng.longitude);
+      setPois(data.slice(0, 5));
+    } catch (err: any) {
+      setPoisError(err?.message ?? "Failed to load POIs");
+    } finally {
+      setPoisLoading(false);
     }
+  }, []);
+  const onShortPress = useCallback(async (e: MapPressEvent) => {
+    setPois([]);
+    setSelectedPoiId("");
+    setPoisError("");
+    setPoisLoading(false);
+    setDestination(null)
+  }, [])
 
+  const onPickPoi = useCallback(
+    (poiId: string) => {
+      setSelectedPoiId(poiId);
+      const poi = pois.find((p) => String(p.osm_id) === poiId);
+      if (!poi || !mapRef.current) return;
 
-    const mapRef = useRef<MapView | null>(null);
-    const BrumBounds = {
-        sw: {latitude: 52.460439, longitude: -1.928328},
-        ne: {latitude: 52.49536, longitude: -1.871856}
-    };
-    // useEffect(() => {
-    //     if(mapRef.current){
-    //         mapRef.current.setMapBoundaries(
-    //             BrumBounds.ne,
-    //             BrumBounds.sw
-    //         );
-    //     }
-    // }, []);
-    const onMapReady = useCallback(async () => {
-        const map = mapRef.current;
-        if(!map) return;
-        if(Platform.OS == "android")
-            map.setMapBoundaries(BrumBounds.ne, BrumBounds.sw);
-    }, [])
-    // function SpawnAnchor(coordinates : LatLng){
-    //     return (<Marker 
-    //         coordinate={coordinates}
-    //         draggable
-    //         title='Destination'
-    //     />)
-    // }
-    return(
-        <MapView
-            ref={mapRef}
-            style={{flex:1}}
-            customMapStyle={EMPTY_MAP_STYLE}
-            initialRegion={{
-                longitude: -1.900092,
-                longitudeDelta: 0.028236,
-                latitude: 52.4778995,
-                latitudeDelta: 0.0174604,
-            }}
-            onMapReady={onMapReady}
-            onLongPress={setMarker}
-        //    cameraZoomRange={{}} 
-        >
-            <UrlTile urlTemplate='https://map.burntheatlantic.com/tile/{z}/{x}/{y}.png'/>
-            {uniqueMarker && (<Marker
-                key={uniqueMarker.id}
-                coordinate={uniqueMarker.latlng}
-                title={uniqueMarker.title}
-            />)}
+      mapRef.current.animateToRegion(
+        {
+          latitude: poi.poi_lat,
+          longitude: poi.poi_lng,
+          latitudeDelta: 0.001,
+          longitudeDelta: 0.001,
+        },
+        250
+      );
+    },
+    [pois]
+  );
 
-        </MapView>
-    );
+  return (
+    <View style={styles.container}>
+      <MapView
+        ref={mapRef}
+        style={styles.map}
+        mapType="none"
+        initialRegion={INITIAL_REGION}
+        onLongPress={onLongPress}
+        onPress={onShortPress}
+        minZoomLevel={16}
+        maxZoomLevel={19}
+        showsPointsOfInterest={false}
+      >
+        <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
+
+        {(destination && !selectedPoi) && (
+          <Marker
+            coordinate={destination.latlng}
+            title={destination.title}
+            pinColor="red"
+            stopPropagation={true}
+          />
+        )}
+
+        {selectedPoi && (
+          <Marker
+            coordinate={{ latitude: selectedPoi.poi_lat, longitude: selectedPoi.poi_lng }}
+            title={selectedPoi.name ?? "Selected POI"}
+            description={`${Math.round(selectedPoi.meters)}m away`}
+            pinColor="blue"
+          />
+        )}
+      </MapView>
+
+      {destination && (
+        <View style={styles.overlay}>
+          <Text style={styles.overlayTitle}>Nearby Places</Text>
+
+          {poisLoading ? (
+            <View style={styles.row}>
+              <ActivityIndicator />
+              <Text style={styles.rowText}>Loading…</Text>
+            </View>
+          ) : poisError ? (
+            <Text style={styles.error}>{poisError}</Text>
+          ) : pois.length === 0 ? (
+            <Text>Nothing found near that point.</Text>
+          ) : (
+            <View style={styles.pickerWrap}>
+              <Picker
+                selectedValue={selectedPoiId}
+                onValueChange={(value) => onPickPoi(String(value))}
+                mode={Platform.OS === "android" ? "dropdown" : "dialog"}
+              >
+                <Picker.Item color={"#000000"}label="Select a POI…" value="" />
+                {pois.slice(0, 20).map((p) => (
+                  <Picker.Item
+                    key={p.osm_id}
+                    color={"#000000"}
+                    label={poiLabel(p)}
+                    value={String(p.osm_id)}
+                  />
+                ))}
+              </Picker>
+            </View>
+          )}
+        </View>
+      )}
+    </View>
+  );
 }
 
-// export default function MapScreen() {
-//   return (
-//     <View style={styles.container}>
-//         <MapView
-//             style={styles.map}
-//             initialRegion={{
-//                 longitude: -1.900092,
-//                 longitudeDelta: 0.028236,
-//                 latitude: 52.4778995,
-//                 latitudeDelta: 0.0174604,
-//             }}>
-//                 <UrlTile
-//                     urlTemplate='http://map.burntheatlantic.com/{z}/{x}/{y}.png'
-//                 />
-//             </MapView>
-//     </View>
-//   );
-// }
 
-// const styles = StyleSheet.create({
-//     container:{
-//         ...StyleSheet.absoluteFillObject,
-//         height: 400,
-//         width: 400,
-//         justifyContent: 'flex-end',
-//         alignItems: 'center',
-//     },
-//     map:{...StyleSheet.absoluteFillObject}
-// });
-export default BrumMap;
-
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  map: { flex: 1 },
+  overlay: {
+    position: "absolute",
+    left: 12,
+    right: 12,
+    bottom: 12,
+    padding: 12,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.95)",
+  },
+  overlayTitle: { fontWeight: "700", marginBottom: 8 },
+  error: { color: "#b00020" },
+  row: { flexDirection: "row", alignItems: "center" },
+  rowText: { marginLeft: 8, color: "#000000" },
+  pickerWrap: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+});
