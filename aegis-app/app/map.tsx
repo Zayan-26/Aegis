@@ -68,8 +68,8 @@ export default function BrumMap() {
         {
           latitude: poi.poi_lat,
           longitude: poi.poi_lng,
-          latitudeDelta: 0.003,
-          longitudeDelta: 0.003,
+          latitudeDelta: 0.001,
+          longitudeDelta: 0.001,
         },
         250
       );
@@ -92,8 +92,13 @@ export default function BrumMap() {
       >
         <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
 
-        {destination && (
-          <Marker coordinate={destination.latlng} title={destination.title} pinColor="red" stopPropagation={true} />
+        {(destination && !selectedPoi) && (
+          <Marker
+            coordinate={destination.latlng}
+            title={destination.title}
+            pinColor="red"
+            stopPropagation={true}
+          />
         )}
 
         {selectedPoi && (
@@ -106,39 +111,44 @@ export default function BrumMap() {
         )}
       </MapView>
 
-      <View style={styles.overlay}>
-        <Text style={styles.overlayTitle}>Nearby POIs</Text>
+      {destination && (
+        <View style={styles.overlay}>
+          <Text style={styles.overlayTitle}>Nearby Places</Text>
 
-        {!destination ? (
-          <Text>Long-press the map to choose a point.</Text>
-        ) : poisLoading ? (
-          <View style={styles.row}>
-            <ActivityIndicator />
-            <Text style={styles.rowText}>Loading…</Text>
-          </View>
-        ) : poisError ? (
-          <Text style={styles.error}>{poisError}</Text>
-        ) : pois.length === 0 ? (
-          <Text>No POIs found near that point.</Text>
-        ) : (
-          <View style={styles.pickerWrap}>
-            <Picker
-              selectedValue={selectedPoiId}
-              onValueChange={(value) => onPickPoi(String(value))}
-              mode={Platform.OS === "android" ? "dropdown" : "dialog"}
-            >
-              <Picker.Item label="Select a POI…" value="" />
-              {pois.slice(0, 20).map((p) => (
-                <Picker.Item color={"#000000"}key={p.osm_id} label={poiLabel(p)} value={String(p.osm_id)} />
-              ))}
-            </Picker>
-          </View>
-        )}
-
-      </View>
+          {poisLoading ? (
+            <View style={styles.row}>
+              <ActivityIndicator />
+              <Text style={styles.rowText}>Loading…</Text>
+            </View>
+          ) : poisError ? (
+            <Text style={styles.error}>{poisError}</Text>
+          ) : pois.length === 0 ? (
+            <Text>Nothing found near that point.</Text>
+          ) : (
+            <View style={styles.pickerWrap}>
+              <Picker
+                selectedValue={selectedPoiId}
+                onValueChange={(value) => onPickPoi(String(value))}
+                mode={Platform.OS === "android" ? "dropdown" : "dialog"}
+              >
+                <Picker.Item color={"#000000"}label="Select a POI…" value="" />
+                {pois.slice(0, 20).map((p) => (
+                  <Picker.Item
+                    key={p.osm_id}
+                    color={"#000000"}
+                    label={poiLabel(p)}
+                    value={String(p.osm_id)}
+                  />
+                ))}
+              </Picker>
+            </View>
+          )}
+        </View>
+      )}
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
@@ -155,7 +165,7 @@ const styles = StyleSheet.create({
   overlayTitle: { fontWeight: "700", marginBottom: 8 },
   error: { color: "#b00020" },
   row: { flexDirection: "row", alignItems: "center" },
-  rowText: { marginLeft: 8 , color : "#000000"},
+  rowText: { marginLeft: 8, color: "#000000" },
   pickerWrap: {
     borderWidth: 1,
     borderColor: "#ddd",
