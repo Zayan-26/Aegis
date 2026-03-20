@@ -1,4 +1,3 @@
-// app/journey.tsx
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useRef, useState } from "react";
@@ -69,7 +68,6 @@ export default function JourneyScreen() {
           backgroundColor={screenBackground}
         />
 
-        {/* Map */}
         <View
           style={[
             styles.mapBox,
@@ -114,7 +112,6 @@ export default function JourneyScreen() {
           </Text>
         </View>
 
-        {/* Bottom sheet */}
         <BottomSheet
           ref={bottomSheetRef}
           index={1}
@@ -130,7 +127,6 @@ export default function JourneyScreen() {
             contentContainerStyle={styles.sheetContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Destination row */}
             <View
               style={[
                 styles.destinationRow,
@@ -156,7 +152,6 @@ export default function JourneyScreen() {
               </Text>
             </View>
 
-            {/* Route cards */}
             {ROUTES.map((route) => {
               const isSelected = selectedRoute === route.id;
               const routeBg = highContrast
