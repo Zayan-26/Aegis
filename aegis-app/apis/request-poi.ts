@@ -20,7 +20,7 @@ export async function fetchNearbyPois(latlng: LatLng): Promise<Poi[]> {
   const res = await fetch(POI_ENDPOINT, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(latlng),
+    body: JSON.stringify({"lat" : latlng.latitude, "lng": latlng.longitude}),
   });
 
   if (!res.ok) {
