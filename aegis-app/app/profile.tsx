@@ -10,11 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAccessibility } from "@/contexts/AccessibilityContext";
-import { SafeAreaView } from 'react-native-safe-area-context'
-import BackBtn from "@/components/back-button";
-import { useAuth } from "@/contexts/AuthContext";
-import { logout } from "@/apis/authentication";
+import { useAccessibility } from "./AccessibilityContext";
 
 export default function ProfileScreen() {
   const { token } = useAuth()
@@ -28,11 +24,16 @@ export default function ProfileScreen() {
     setTrustedContacts,
     theme,
   } = useAccessibility();
-  const {
-    setDisplayName,
-    setToken
-  } = useAuth()
 
+  const screenBackground = highContrast ? "#000000" : "#F7F8FC";
+  const boxBackground = highContrast ? "#1A1A1A" : "#FFFFFF";
+  const mainTextColor = highContrast ? "#FFFFFF" : "#1E2A78";
+  const smallTextColor = highContrast ? "#CCCCCC" : "#4F647A";
+  const boxBorderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
+  const buttonColor = colorBlind ? "#E69F00" : "#69B7C6";
+  const font = dyslexic ? "OpenDyslexic" : undefined;
+  const letterSpacing = dyslexic ? 1 : 0;
+  const labelSize = largeButtons ? 17 : 15;
   const btnPadding = largeButtons ? 18 : 14;
 
   const resetAll = () => {
@@ -141,8 +142,8 @@ export default function ProfileScreen() {
       />
 
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: theme.boxBorderColor }]}>
-        {/* <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+      <View style={[styles.header, { borderBottomColor: boxBorderColor }]}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text
             style={[
               styles.backText,

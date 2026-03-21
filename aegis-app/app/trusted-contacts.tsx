@@ -110,15 +110,15 @@ export default function TrustedContactsScreen() {
       Alert.alert("No contacts added", "Please add at least one trusted contact.");
       return;
     }
-    setTrustedContacts(trusted);
-    router.push("/select-destination");
+    setTrustedContacts(trusted); // saves to context so route-detail can read them
+    router.push("/explore");
   };
 
   if (permissionDenied) {
     return (
-      <View style={[styles.container, {backgroundColor: theme.screenBackground}]}>
-        <BackBtn/>
-      <View style={[styles.centered, { backgroundColor: theme.screenBackground }]}>
+      <View
+        style={[styles.container, styles.centered, { backgroundColor: bg }]}
+      >
         <Text style={styles.permissionIcon}>🔒</Text>
         <Text style={[styles.permissionTitle, { color: theme.mainTextColor, fontFamily: theme.font }]}>
           Contacts Access Needed
@@ -147,8 +147,11 @@ export default function TrustedContactsScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
-      {/* <TouchableOpacity onPress={() => router.back()} style={{ alignSelf: "flex-start", marginBottom: 8 }}>
+    <View style={[styles.container, { backgroundColor: bg }]}>
+      <TouchableOpacity
+        onPress={() => router.back()}
+        style={{ alignSelf: "flex-start", marginBottom: 8 }}
+      >
         <Text
           style={{
             color: theme.mainTextColor,
@@ -160,9 +163,7 @@ export default function TrustedContactsScreen() {
         >
           ← Back
         </Text>
-      </TouchableOpacity> */}
-      <BackBtn/>
-
+      </TouchableOpacity>
       <View style={styles.header}>
         <Text style={[styles.logo, { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing }]}>
           aegis
@@ -356,7 +357,7 @@ export default function TrustedContactsScreen() {
         <TouchableOpacity
           onPress={() => {
             setTrustedContacts([]);
-            router.push("/select-destination");
+            router.push("/explore");
           }}
         >
           <Text

@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useAccessibility } from "./AccessibilityContext";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
 
 const ROUTES = [
   {
@@ -37,62 +37,42 @@ const ROUTES = [
 
 export default function JourneyScreen() {
   const { destination } = useLocalSearchParams<{ destination: string }>();
-  const { dyslexic, colorBlind, highContrast, largeButtons } =
-    useAccessibility();
+  const { highContrast, largeButtons, theme } = useAccessibility();
   const [selectedRoute, setSelectedRoute] = useState("safest");
 
   const snapPoints = useMemo(() => ["15%", "45%", "85%"], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
 
-  const screenBackground = highContrast ? "#000000" : "#F7F8FC";
-  const boxBackground = highContrast ? "#1A1A1A" : "#FFFFFF";
-  const mainTextColor = highContrast ? "#FFFFFF" : "#1E2A78";
-  const smallTextColor = highContrast ? "#CCCCCC" : "#4F647A";
-  const boxBorderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
-  const buttonColor = colorBlind ? "#E69F00" : "#69B7C6";
-  const buttonTextColor = colorBlind ? "#000000" : "#FFFFFF";
-  const font = dyslexic ? "OpenDyslexic" : undefined;
-  const letterSpacing = dyslexic ? 1 : 0;
-  const lineH = dyslexic ? 24 : 20;
-  const labelSize = largeButtons ? 17 : 15;
-
   return (
-    <GestureHandlerRootView
-      style={{ flex: 1, backgroundColor: screenBackground }}
-    >
-      <SafeAreaView
-        style={[styles.safe, { backgroundColor: screenBackground }]}
-      >
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.screenBackground }}>
+      <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
         <StatusBar
           barStyle={highContrast ? "light-content" : "dark-content"}
-          backgroundColor={screenBackground}
+          backgroundColor={theme.screenBackground}
         />
 
         <View
           style={[
             styles.mapBox,
-            { backgroundColor: boxBackground, borderColor: boxBorderColor },
+            { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor },
           ]}
         >
-          <TouchableOpacity
-            style={styles.closeBtn}
-            onPress={() => router.back()}
-          >
-            <Text style={[styles.closeBtnText, { color: mainTextColor }]}>
-              ✕
-            </Text>
+          <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
+            <Text style={[styles.closeBtnText, { color: theme.mainTextColor }]}>✕</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={{ position: "absolute", top: 14, right: 14 }}
             onPress={() => router.push("/profile")}
           >
-            <Text style={{ fontSize: 24, color: mainTextColor }}>☰</Text>
+            <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
           </TouchableOpacity>
+
           <Text style={styles.mapEmoji}>🗺️</Text>
           <Text
             style={[
               styles.mapTitle,
-              { color: mainTextColor, fontFamily: font, letterSpacing },
+              { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
             ]}
           >
             Map...
@@ -101,10 +81,10 @@ export default function JourneyScreen() {
             style={[
               styles.mapSubtitle,
               {
-                color: smallTextColor,
-                fontFamily: font,
-                letterSpacing,
-                lineHeight: lineH,
+                color: theme.smallTextColor,
+                fontFamily: theme.font,
+                letterSpacing: theme.letterSpacing,
+                lineHeight: theme.lineH,
               },
             ]}
           >
@@ -116,9 +96,9 @@ export default function JourneyScreen() {
           ref={bottomSheetRef}
           index={1}
           snapPoints={snapPoints}
-          backgroundStyle={[styles.sheetBg, { backgroundColor: boxBackground }]}
+          backgroundStyle={[styles.sheetBg, { backgroundColor: theme.boxBackground }]}
           handleIndicatorStyle={{
-            backgroundColor: boxBorderColor,
+            backgroundColor: theme.boxBorderColor,
             width: 40,
             height: 4,
           }}
@@ -134,17 +114,15 @@ export default function JourneyScreen() {
               ]}
             >
               <Text style={{ fontSize: 16 }}>🔍</Text>
-              <Text style={{ color: smallTextColor, fontSize: 11 }}>
-                Heading to
-              </Text>
+              <Text style={{ color: theme.smallTextColor, fontSize: 11 }}>Heading to</Text>
               <Text
                 style={[
                   styles.destinationText,
                   {
-                    color: mainTextColor,
-                    fontFamily: font,
-                    fontSize: labelSize,
-                    letterSpacing,
+                    color: theme.mainTextColor,
+                    fontFamily: theme.font,
+                    fontSize: theme.labelSize,
+                    letterSpacing: theme.letterSpacing,
                   },
                 ]}
               >
@@ -196,9 +174,9 @@ export default function JourneyScreen() {
                           styles.routeLabel,
                           {
                             color: routeTextColor,
-                            fontFamily: font,
-                            fontSize: labelSize,
-                            letterSpacing,
+                            fontFamily: theme.font,
+                            fontSize: theme.labelSize,
+                            letterSpacing: theme.letterSpacing,
                           },
                         ]}
                       >
@@ -208,11 +186,7 @@ export default function JourneyScreen() {
                         <Text
                           style={[
                             styles.routeScore,
-                            {
-                              color: routeTextColor,
-                              fontFamily: font,
-                              letterSpacing,
-                            },
+                            { color: routeTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
                           ]}
                         >
                           Safety score: {route.score}
@@ -223,9 +197,9 @@ export default function JourneyScreen() {
                           styles.routeDesc,
                           {
                             color: routeDescColor,
-                            fontFamily: font,
-                            letterSpacing,
-                            lineHeight: lineH,
+                            fontFamily: theme.font,
+                            letterSpacing: theme.letterSpacing,
+                            lineHeight: theme.lineH,
                           },
                         ]}
                       >
@@ -238,9 +212,9 @@ export default function JourneyScreen() {
                       styles.routeTime,
                       {
                         color: routeTextColor,
-                        fontFamily: font,
-                        fontSize: labelSize + 2,
-                        letterSpacing,
+                        fontFamily: theme.font,
+                        fontSize: theme.labelSize + 2,
+                        letterSpacing: theme.letterSpacing,
                       },
                     ]}
                   >
