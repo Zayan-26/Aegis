@@ -1,4 +1,3 @@
-// app/arrived.tsx
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useRef } from "react";
@@ -11,7 +10,7 @@ import {
     View,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useAccessibility } from "./AccessibilityContext";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
 
 export default function ArrivedScreen() {
   const { destination, distance, duration, routeLabel } = useLocalSearchParams<{
@@ -21,53 +20,39 @@ export default function ArrivedScreen() {
     routeLabel: string;
   }>();
 
-  const { dyslexic, colorBlind, highContrast, largeButtons, notifyOn } =
+  const { highContrast, largeButtons, notifyOn, theme } =
     useAccessibility();
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["30%", "55%", "85%"], []);
 
-  const screenBackground = highContrast ? "#000000" : "#F7F8FC";
-  const boxBackground = highContrast ? "#1A1A1A" : "#FFFFFF";
-  const mainTextColor = highContrast ? "#FFFFFF" : "#1E2A78";
-  const smallTextColor = highContrast ? "#CCCCCC" : "#4F647A";
-  const boxBorderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
-  const buttonColor = colorBlind ? "#E69F00" : "#69B7C6";
-  const buttonTextColor = colorBlind ? "#000000" : "#FFFFFF";
-  const font = dyslexic ? "OpenDyslexic" : undefined;
-  const letterSpacing = dyslexic ? 1 : 0;
-  const btnPadding = largeButtons ? 22 : 16;
-  const btnRadius = largeButtons ? 20 : 16;
-  const btnTextSize = largeButtons ? 20 : 17;
-  const labelSize = largeButtons ? 17 : 15;
-
   return (
     <GestureHandlerRootView
-      style={{ flex: 1, backgroundColor: screenBackground }}
+      style={{ flex: 1, backgroundColor: theme.screenBackground }}
     >
       <SafeAreaView
-        style={[styles.safe, { backgroundColor: screenBackground }]}
+        style={[styles.safe, { backgroundColor: theme.screenBackground }]}
       >
         <StatusBar
           barStyle={highContrast ? "light-content" : "dark-content"}
-          backgroundColor={screenBackground}
+          backgroundColor={theme.screenBackground}
         />
 
         {/* Map placeholder fills background */}
         <View
           style={[
             styles.mapBg,
-            { backgroundColor: boxBackground, borderColor: boxBorderColor },
+            { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor },
           ]}
         >
           <TouchableOpacity
             style={{ position: "absolute", top: 14, right: 14 }}
             onPress={() => router.push("/profile")}
           >
-            <Text style={{ fontSize: 24, color: mainTextColor }}>☰</Text>
+            <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
           </TouchableOpacity>
           <Text style={styles.mapEmoji}>🗺️</Text>
-          <Text style={[styles.mapLabel, { color: smallTextColor }]}>
+          <Text style={[styles.mapLabel, { color: theme.smallTextColor }]}>
             Journey complete
           </Text>
         </View>
@@ -77,9 +62,9 @@ export default function ArrivedScreen() {
           ref={bottomSheetRef}
           index={1}
           snapPoints={snapPoints}
-          backgroundStyle={{ backgroundColor: boxBackground }}
+          backgroundStyle={{ backgroundColor: theme.boxBackground }}
           handleIndicatorStyle={{
-            backgroundColor: boxBorderColor,
+            backgroundColor: theme.boxBorderColor,
             width: 40,
             height: 4,
           }}
@@ -95,9 +80,9 @@ export default function ArrivedScreen() {
                   style={[
                     styles.title,
                     {
-                      color: mainTextColor,
-                      fontFamily: font,
-                      letterSpacing,
+                      color: theme.mainTextColor,
+                      fontFamily: theme.font,
+                      letterSpacing: theme.letterSpacing,
                       fontSize: largeButtons ? 22 : 20,
                     },
                   ]}
@@ -107,7 +92,7 @@ export default function ArrivedScreen() {
                 <Text
                   style={[
                     styles.subtitle,
-                    { color: smallTextColor, fontFamily: font, letterSpacing },
+                    { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
                   ]}
                 >
                   {routeLabel} · {destination}
@@ -116,7 +101,7 @@ export default function ArrivedScreen() {
             </View>
 
             <View
-              style={[styles.divider, { backgroundColor: boxBorderColor }]}
+              style={[styles.divider, { backgroundColor: theme.boxBorderColor }]}
             />
 
             {/* Journey stats */}
@@ -125,7 +110,7 @@ export default function ArrivedScreen() {
                 styles.statsCard,
                 {
                   backgroundColor: highContrast ? "#2A2A2A" : "#F0FAF8",
-                  borderColor: buttonColor,
+                  borderColor: theme.buttonColor,
                 },
               ]}
             >
@@ -134,9 +119,9 @@ export default function ArrivedScreen() {
                   style={[
                     styles.statLabel,
                     {
-                      color: smallTextColor,
-                      fontFamily: font,
-                      fontSize: labelSize,
+                      color: theme.smallTextColor,
+                      fontFamily: theme.font,
+                      fontSize: theme.labelSize,
                     },
                   ]}
                 >
@@ -146,9 +131,9 @@ export default function ArrivedScreen() {
                   style={[
                     styles.statValue,
                     {
-                      color: mainTextColor,
-                      fontFamily: font,
-                      fontSize: labelSize,
+                      color: theme.mainTextColor,
+                      fontFamily: theme.font,
+                      fontSize: theme.labelSize,
                     },
                   ]}
                 >
@@ -158,7 +143,7 @@ export default function ArrivedScreen() {
               <View
                 style={[
                   styles.statDivider,
-                  { backgroundColor: boxBorderColor },
+                  { backgroundColor: theme.boxBorderColor },
                 ]}
               />
               <View style={styles.statRow}>
@@ -166,9 +151,9 @@ export default function ArrivedScreen() {
                   style={[
                     styles.statLabel,
                     {
-                      color: smallTextColor,
-                      fontFamily: font,
-                      fontSize: labelSize,
+                      color: theme.smallTextColor,
+                      fontFamily: theme.font,
+                      fontSize: theme.labelSize,
                     },
                   ]}
                 >
@@ -178,9 +163,9 @@ export default function ArrivedScreen() {
                   style={[
                     styles.statValue,
                     {
-                      color: mainTextColor,
-                      fontFamily: font,
-                      fontSize: labelSize,
+                      color: theme.mainTextColor,
+                      fontFamily: theme.font,
+                      fontSize: theme.labelSize,
                     },
                   ]}
                 >
@@ -195,10 +180,10 @@ export default function ArrivedScreen() {
                 style={[
                   styles.companionText,
                   {
-                    color: smallTextColor,
-                    fontFamily: font,
-                    letterSpacing,
-                    fontSize: labelSize,
+                    color: theme.smallTextColor,
+                    fontFamily: theme.font,
+                    letterSpacing: theme.letterSpacing,
+                    fontSize: theme.labelSize,
                   },
                 ]}
               >
@@ -212,9 +197,9 @@ export default function ArrivedScreen() {
                 style={[
                   styles.actionBtn,
                   {
-                    borderColor: boxBorderColor,
-                    backgroundColor: boxBackground,
-                    paddingVertical: btnPadding - 4,
+                    borderColor: theme.boxBorderColor,
+                    backgroundColor: theme.boxBackground,
+                    paddingVertical: theme.btnPadding - 4,
                   },
                 ]}
                 accessibilityLabel="Save journey"
@@ -223,10 +208,10 @@ export default function ArrivedScreen() {
                   style={[
                     styles.actionLabel,
                     {
-                      color: mainTextColor,
-                      fontFamily: font,
-                      letterSpacing,
-                      fontSize: labelSize,
+                      color: theme.mainTextColor,
+                      fontFamily: theme.font,
+                      letterSpacing: theme.letterSpacing,
+                      fontSize: theme.labelSize,
                     },
                   ]}
                 >
@@ -238,9 +223,9 @@ export default function ArrivedScreen() {
                 style={[
                   styles.actionBtn,
                   {
-                    borderColor: boxBorderColor,
-                    backgroundColor: boxBackground,
-                    paddingVertical: btnPadding - 4,
+                    borderColor: theme.boxBorderColor,
+                    backgroundColor: theme.boxBackground,
+                    paddingVertical: theme.btnPadding - 4,
                   },
                 ]}
                 onPress={() =>
@@ -255,10 +240,10 @@ export default function ArrivedScreen() {
                   style={[
                     styles.actionLabel,
                     {
-                      color: mainTextColor,
-                      fontFamily: font,
-                      letterSpacing,
-                      fontSize: labelSize,
+                      color: theme.mainTextColor,
+                      fontFamily: theme.font,
+                      letterSpacing: theme.letterSpacing,
+                      fontSize: theme.labelSize,
                     },
                   ]}
                 >
@@ -272,22 +257,22 @@ export default function ArrivedScreen() {
               style={[
                 styles.homeBtn,
                 {
-                  backgroundColor: buttonColor,
-                  paddingVertical: btnPadding,
-                  borderRadius: btnRadius,
+                  backgroundColor: theme.buttonColor,
+                  paddingVertical: theme.btnPadding,
+                  borderRadius: theme.btnRadius,
                 },
               ]}
-              onPress={() => router.replace("/explore")}
+              onPress={() => router.replace("/(tabs)/travel")}
               accessibilityLabel="Return to Home"
             >
               <Text
                 style={[
                   styles.homeBtnText,
                   {
-                    color: buttonTextColor,
-                    fontSize: btnTextSize,
-                    fontFamily: font,
-                    letterSpacing,
+                    color: theme.buttonTextColor,
+                    fontSize: theme.btnTextSize,
+                    fontFamily: theme.font,
+                    letterSpacing: theme.letterSpacing,
                   },
                 ]}
               >

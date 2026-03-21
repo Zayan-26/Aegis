@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Platform, StyleSheet, Text, View } from "react-native";
 import MapView, { LatLng, LongPressEvent, MapPressEvent, Marker, Region, UrlTile } from "react-native-maps";
 import { Picker } from "@react-native-picker/picker";
-import { fetchNearbyPois, Poi, poiLabel } from "./apis/request-poi";
+import { fetchNearbyPois, Poi, poiLabel } from "@/apis/request-poi";
 
 type DestinationMarker = {
   id: number;
@@ -42,7 +42,7 @@ export default function BrumMap() {
     setPoisLoading(true);
 
     try {
-      const data = await fetchNearbyPois(latlng.latitude, latlng.longitude);
+      const data = await fetchNearbyPois(latlng);
       setPois(data.slice(0, 5));
     } catch (err: any) {
       setPoisError(err?.message ?? "Failed to load POIs");

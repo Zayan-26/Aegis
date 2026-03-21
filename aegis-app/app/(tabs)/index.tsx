@@ -6,7 +6,7 @@ return(
 <View style={styles.container}>
 <View style={styles.topSection}>
 <Image 
-source={require("../assets/images/aegis-logo.png")}
+source={require("@/assets/images/aegis-logo.png")}
 style={styles.logoImage}
 resizeMode="contain" />
 

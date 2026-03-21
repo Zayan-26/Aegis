@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAccessibility } from "./AccessibilityContext";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
 
 interface Contact {
   id: string;
@@ -37,9 +37,7 @@ function Avatar({
     .join("")
     .toUpperCase();
   const colors = ["#69B7C6", "#7C6FAD", "#2D7D6F", "#E69F00", "#1E2A78"];
-  const bg = highContrast
-    ? "#FFFFFF"
-    : colors[name.charCodeAt(0) % colors.length];
+  const bg = highContrast ? "#FFFFFF" : colors[name.charCodeAt(0) % colors.length];
   const textColor = highContrast ? "#000000" : "#FFFFFF";
   if (image) {
     return <Image source={{ uri: image }} style={styles.avatarImg} />;
@@ -52,36 +50,15 @@ function Avatar({
 }
 
 export default function TrustedContactsScreen() {
-  const {
-    dyslexic,
-    colorBlind,
-    highContrast,
-    largeButtons,
-    setTrustedContacts,
-  } = useAccessibility();
+  const { highContrast, theme, trustedContacts, setTrustedContacts, largeButtons } = useAccessibility();
 
   const [allContacts, setAllContacts] = useState<Contact[]>([]);
-  const { trustedContacts } = useAccessibility();
   const [trusted, setTrusted] = useState<Contact[]>(trustedContacts);
   const [search, setSearch] = useState("");
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const bg = highContrast ? "#000000" : "#F7F8FC";
-  const cardBg = highContrast ? "#1A1A1A" : "#FFFFFF";
-  const textPrimary = highContrast ? "#FFFFFF" : "#1E2A78";
-  const textSecondary = highContrast ? "#CCCCCC" : "#4F647A";
-  const borderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
-  const primaryBtn = colorBlind ? "#E69F00" : "#69B7C6";
-  const primaryBtnText = colorBlind ? "#000000" : "#FFFFFF";
-  const font = dyslexic ? "OpenDyslexic" : undefined;
-  const letterSpacing = dyslexic ? 1 : 0;
-  const lineH = dyslexic ? 24 : 20;
-  const btnPadding = largeButtons ? 22 : 16;
-  const btnRadius = largeButtons ? 20 : 16;
   const titleSize = largeButtons ? 30 : 26;
-  const labelSize = largeButtons ? 17 : 15;
-  const btnTextSize = largeButtons ? 20 : 17;
 
   useEffect(() => {
     (async () => {
@@ -92,11 +69,7 @@ export default function TrustedContactsScreen() {
         return;
       }
       const { data } = await Contacts.getContactsAsync({
-        fields: [
-          Contacts.Fields.Name,
-          Contacts.Fields.PhoneNumbers,
-          Contacts.Fields.Image,
-        ],
+        fields: [Contacts.Fields.Name, Contacts.Fields.PhoneNumbers, Contacts.Fields.Image],
       });
       const mapped: Contact[] = data
         .filter((c) => c.name && c.phoneNumbers && c.phoneNumbers.length > 0)
@@ -114,8 +87,7 @@ export default function TrustedContactsScreen() {
 
   const filteredContacts = allContacts.filter(
     (c) =>
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.phone.includes(search),
+      c.name.toLowerCase().includes(search.toLowerCase()) || c.phone.includes(search),
   );
 
   const trustedIds = new Set(trusted.map((c) => c.id));
@@ -130,62 +102,39 @@ export default function TrustedContactsScreen() {
     }
   };
 
-  const removeContact = (id: string) =>
-    setTrusted((prev) => prev.filter((c) => c.id !== id));
+  const removeContact = (id: string) => setTrusted((prev) => prev.filter((c) => c.id !== id));
 
-  // ── Save contacts to global context then navigate ──────────
   const handleSave = () => {
     if (trusted.length === 0) {
-      Alert.alert(
-        "No contacts added",
-        "Please add at least one trusted contact.",
-      );
+      Alert.alert("No contacts added", "Please add at least one trusted contact.");
       return;
     }
-    setTrustedContacts(trusted); // saves to context so route-detail can read them
-    router.push("/explore");
+    setTrustedContacts(trusted);
+    router.push("/(tabs)/travel");
   };
 
   if (permissionDenied) {
     return (
-      <View
-        style={[styles.container, styles.centered, { backgroundColor: bg }]}
-      >
+      <View style={[styles.container, styles.centered, { backgroundColor: theme.screenBackground }]}>
         <Text style={styles.permissionIcon}>🔒</Text>
-        <Text
-          style={[
-            styles.permissionTitle,
-            { color: textPrimary, fontFamily: font },
-          ]}
-        >
+        <Text style={[styles.permissionTitle, { color: theme.mainTextColor, fontFamily: theme.font }]}>
           Contacts Access Needed
         </Text>
-        <Text
-          style={[
-            styles.permissionDesc,
-            { color: textSecondary, fontFamily: font },
-          ]}
-        >
-          Aegis needs access to your contacts to add trusted companions. Please
-          enable it in your phone settings.
+        <Text style={[styles.permissionDesc, { color: theme.smallTextColor, fontFamily: theme.font, lineHeight: theme.lineH }]}>
+          Aegis needs access to your contacts to add trusted companions. Please enable it in your phone settings.
         </Text>
         <TouchableOpacity
           style={[
             styles.primaryButton,
             {
-              backgroundColor: primaryBtn,
-              paddingVertical: btnPadding,
-              borderRadius: btnRadius,
+              backgroundColor: theme.buttonColor,
+              paddingVertical: theme.btnPadding,
+              borderRadius: theme.btnRadius,
             },
           ]}
           onPress={() => router.back()}
         >
-          <Text
-            style={[
-              styles.primaryButtonText,
-              { color: primaryBtnText, fontFamily: font },
-            ]}
-          >
+          <Text style={[styles.primaryButtonText, { color: theme.buttonTextColor, fontFamily: theme.font, fontSize: theme.btnTextSize }]}>
             Go Back
           </Text>
         </TouchableOpacity>
@@ -194,30 +143,29 @@ export default function TrustedContactsScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: bg }]}>
-      <TouchableOpacity
-        onPress={() => router.back()}
-        style={{ alignSelf: "flex-start", marginBottom: 8 }}
-      >
+    <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
+      <TouchableOpacity onPress={() => router.back()} style={{ alignSelf: "flex-start", marginBottom: 8 }}>
         <Text
           style={{
-            color: textPrimary,
+            color: theme.mainTextColor,
             fontSize: 16,
             fontWeight: "600",
-            fontFamily: font,
+            fontFamily: theme.font,
+            letterSpacing: theme.letterSpacing,
           }}
         >
           ← Back
         </Text>
       </TouchableOpacity>
+
       <View style={styles.header}>
-        <Text style={[styles.logo, { color: textPrimary, fontFamily: font }]}>
+        <Text style={[styles.logo, { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing }]}>
           aegis
         </Text>
         <Text
           style={[
             styles.title,
-            { color: textPrimary, fontSize: titleSize, fontFamily: font },
+            { color: theme.mainTextColor, fontSize: titleSize, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
           ]}
         >
           Trusted Contacts
@@ -225,7 +173,7 @@ export default function TrustedContactsScreen() {
         <Text
           style={[
             styles.subtitle,
-            { color: textSecondary, fontFamily: font, lineHeight: lineH },
+            { color: theme.smallTextColor, fontFamily: theme.font, lineHeight: theme.lineH, letterSpacing: theme.letterSpacing },
           ]}
         >
           Add up to 5 contacts who can track your journey for your safety.
@@ -234,39 +182,24 @@ export default function TrustedContactsScreen() {
 
       {trusted.length > 0 && (
         <View style={styles.trustedSection}>
-          <Text
-            style={[
-              styles.sectionLabel,
-              { color: textSecondary, fontFamily: font },
-            ]}
-          >
+          <Text style={[styles.sectionLabel, { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing }]}>
             Added ({trusted.length}/5)
           </Text>
           <View style={styles.trustedList}>
             {trusted.map((contact) => (
-              <View
-                key={contact.id}
-                style={[styles.trustedChip, { borderColor: primaryBtn }]}
-              >
-                <Avatar
-                  name={contact.name}
-                  image={contact.image}
-                  highContrast={highContrast}
-                />
+              <View key={contact.id} style={[styles.trustedChip, { borderColor: theme.buttonColor }]}>
+                <Avatar name={contact.name} image={contact.image} highContrast={highContrast} />
                 <Text
                   style={[
                     styles.trustedChipName,
-                    { color: textPrimary, fontFamily: font },
+                    { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
                   ]}
                   numberOfLines={1}
                 >
                   {contact.name.split(" ")[0]}
                 </Text>
                 <TouchableOpacity
-                  style={[
-                    styles.removeChipBtn,
-                    { backgroundColor: primaryBtn },
-                  ]}
+                  style={[styles.removeChipBtn, { backgroundColor: theme.buttonColor }]}
                   onPress={() => removeContact(contact.id)}
                   accessibilityLabel={`Remove ${contact.name}`}
                 >
@@ -278,35 +211,29 @@ export default function TrustedContactsScreen() {
         </View>
       )}
 
-      <View
-        style={[styles.searchWrap, { backgroundColor: cardBg, borderColor }]}
-      >
+      <View style={[styles.searchWrap, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
         <Text style={styles.searchIcon}>🔍</Text>
         <TextInput
-          style={[styles.searchInput, { color: textPrimary, fontFamily: font }]}
+          style={[
+            styles.searchInput,
+            { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+          ]}
           placeholder="Search contacts"
-          placeholderTextColor={textSecondary}
+          placeholderTextColor={theme.smallTextColor}
           value={search}
           onChangeText={setSearch}
           autoCorrect={false}
         />
         {search.length > 0 && (
           <TouchableOpacity onPress={() => setSearch("")}>
-            <Text style={[styles.clearSearch, { color: textSecondary }]}>
-              ✕
-            </Text>
+            <Text style={[styles.clearSearch, { color: theme.smallTextColor }]}>✕</Text>
           </TouchableOpacity>
         )}
       </View>
 
       {loading ? (
         <View style={styles.centered}>
-          <Text
-            style={[
-              styles.loadingText,
-              { color: textSecondary, fontFamily: font },
-            ]}
-          >
+          <Text style={[styles.loadingText, { color: theme.smallTextColor, fontFamily: theme.font }]}>
             Loading contacts...
           </Text>
         </View>
@@ -318,12 +245,7 @@ export default function TrustedContactsScreen() {
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
-            <Text
-              style={[
-                styles.emptyText,
-                { color: textSecondary, fontFamily: font },
-              ]}
-            >
+            <Text style={[styles.emptyText, { color: theme.smallTextColor, fontFamily: theme.font }]}>
               No contacts found
             </Text>
           }
@@ -338,25 +260,22 @@ export default function TrustedContactsScreen() {
                       ? highContrast
                         ? "#333333"
                         : "#F0FAFB"
-                      : cardBg,
-                    borderColor: isAdded ? primaryBtn : borderColor,
+                      : theme.boxBackground,
+                    borderColor: isAdded ? theme.buttonColor : theme.boxBorderColor,
                     padding: largeButtons ? 16 : 12,
                   },
                 ]}
               >
-                <Avatar
-                  name={item.name}
-                  image={item.image}
-                  highContrast={highContrast}
-                />
+                <Avatar name={item.name} image={item.image} highContrast={highContrast} />
                 <View style={styles.contactInfo}>
                   <Text
                     style={[
                       styles.contactName,
                       {
-                        color: textPrimary,
-                        fontSize: labelSize,
-                        fontFamily: font,
+                        color: theme.mainTextColor,
+                        fontSize: theme.labelSize,
+                        fontFamily: theme.font,
+                        letterSpacing: theme.letterSpacing,
                       },
                     ]}
                   >
@@ -365,12 +284,13 @@ export default function TrustedContactsScreen() {
                   <Text
                     style={[
                       styles.contactPhone,
-                      { color: textSecondary, fontFamily: font },
+                      { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
                     ]}
                   >
                     {item.phone}
                   </Text>
                 </View>
+
                 {isAdded ? (
                   <TouchableOpacity
                     style={[
@@ -383,26 +303,15 @@ export default function TrustedContactsScreen() {
                     onPress={() => removeContact(item.id)}
                     accessibilityLabel={`Remove ${item.name}`}
                   >
-                    <Text
-                      style={[
-                        styles.minusBtnText,
-                        highContrast && { color: "#000000" },
-                      ]}
-                    >
-                      −
-                    </Text>
+                    <Text style={[styles.minusBtnText, highContrast && { color: "#000000" }]}>−</Text>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
-                    style={[styles.addBtn, { backgroundColor: primaryBtn }]}
+                    style={[styles.addBtn, { backgroundColor: theme.buttonColor }]}
                     onPress={() => addContact(item)}
                     accessibilityLabel={`Add ${item.name}`}
                   >
-                    <Text
-                      style={[styles.addBtnText, { color: primaryBtnText }]}
-                    >
-                      +
-                    </Text>
+                    <Text style={[styles.addBtnText, { color: theme.buttonTextColor }]}>+</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -416,9 +325,9 @@ export default function TrustedContactsScreen() {
           style={[
             styles.primaryButton,
             {
-              backgroundColor: primaryBtn,
-              paddingVertical: btnPadding,
-              borderRadius: btnRadius,
+              backgroundColor: theme.buttonColor,
+              paddingVertical: theme.btnPadding,
+              borderRadius: theme.btnRadius,
               opacity: trusted.length === 0 ? 0.5 : 1,
             },
           ]}
@@ -428,9 +337,10 @@ export default function TrustedContactsScreen() {
             style={[
               styles.primaryButtonText,
               {
-                color: primaryBtnText,
-                fontSize: btnTextSize,
-                fontFamily: font,
+                color: theme.buttonTextColor,
+                fontSize: theme.btnTextSize,
+                fontFamily: theme.font,
+                letterSpacing: theme.letterSpacing,
               },
             ]}
           >
@@ -441,16 +351,17 @@ export default function TrustedContactsScreen() {
         <TouchableOpacity
           onPress={() => {
             setTrustedContacts([]);
-            router.push("/explore");
+            router.push("/(tabs)/travel");
           }}
         >
           <Text
             style={[
               styles.skipText,
               {
-                color: textSecondary,
-                fontFamily: font,
+                color: theme.smallTextColor,
+                fontFamily: theme.font,
                 fontSize: largeButtons ? 17 : 15,
+                letterSpacing: theme.letterSpacing,
               },
             ]}
           >

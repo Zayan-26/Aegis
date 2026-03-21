@@ -1,4 +1,3 @@
-// app/explore.tsx
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -10,33 +9,19 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAccessibility } from "./AccessibilityContext";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
 
 export default function ExploreScreen() {
-  const { dyslexic, colorBlind, highContrast, largeButtons } =
-    useAccessibility();
+  const { highContrast, largeButtons, theme } = useAccessibility();
   const [destination, setDestination] = useState("");
 
-  const screenBackground = highContrast ? "#000000" : "#F7F8FC";
-  const boxBackground = highContrast ? "#1A1A1A" : "#FFFFFF";
-  const mainTextColor = highContrast ? "#FFFFFF" : "#1E2A78";
-  const smallTextColor = highContrast ? "#CCCCCC" : "#4F647A";
-  const boxBorderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
-  const buttonColor = colorBlind ? "#E69F00" : "#69B7C6";
-  const buttonTextColor = colorBlind ? "#000000" : "#FFFFFF";
-  const font = dyslexic ? "OpenDyslexic" : undefined;
-  const letterSpacing = dyslexic ? 1 : 0;
-  const lineH = dyslexic ? 24 : 20;
-  const btnPadding = largeButtons ? 22 : 16;
-  const btnRadius = largeButtons ? 20 : 16;
-  const btnTextSize = largeButtons ? 20 : 17;
   const inputSize = largeButtons ? 18 : 16;
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: screenBackground }]}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
       <StatusBar
         barStyle={highContrast ? "light-content" : "dark-content"}
-        backgroundColor={screenBackground}
+        backgroundColor={theme.screenBackground}
       />
 
       <View style={styles.container}>
@@ -44,15 +29,16 @@ export default function ExploreScreen() {
           onPress={() => router.push("/profile")}
           style={{ position: "absolute", top: 20, right: 24 }}
         >
-          <Text style={{ fontSize: 24, color: mainTextColor }}>☰</Text>
+          <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
         </TouchableOpacity>
+
         {/* ── Greeting ── */}
         <View style={styles.greetingRow}>
           <View>
             <Text
               style={[
                 styles.welcomeText,
-                { color: smallTextColor, fontFamily: font },
+                { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
               ]}
             >
               Navigate safely. Travel confidently.
@@ -61,9 +47,10 @@ export default function ExploreScreen() {
               style={[
                 styles.headingText,
                 {
-                  color: mainTextColor,
-                  fontFamily: font,
+                  color: theme.mainTextColor,
+                  fontFamily: theme.font,
                   fontSize: largeButtons ? 28 : 22,
+                  letterSpacing: theme.letterSpacing,
                 },
               ]}
             >
@@ -77,9 +64,9 @@ export default function ExploreScreen() {
           style={[
             styles.inputBox,
             {
-              backgroundColor: boxBackground,
-              borderColor: boxBorderColor,
-              paddingVertical: btnPadding - 4,
+              backgroundColor: theme.boxBackground,
+              borderColor: theme.boxBorderColor,
+              paddingVertical: theme.btnPadding - 4,
             },
           ]}
         >
@@ -87,16 +74,21 @@ export default function ExploreScreen() {
           <TextInput
             style={[
               styles.input,
-              { color: mainTextColor, fontSize: inputSize, fontFamily: font },
+              {
+                color: theme.mainTextColor,
+                fontSize: inputSize,
+                fontFamily: theme.font,
+                letterSpacing: theme.letterSpacing,
+              },
             ]}
             placeholder="Enter your destination"
-            placeholderTextColor={smallTextColor}
+            placeholderTextColor={theme.smallTextColor}
             value={destination}
             onChangeText={setDestination}
           />
           {destination.length > 0 && (
             <TouchableOpacity onPress={() => setDestination("")}>
-              <Text style={{ color: smallTextColor, fontSize: 16 }}>✕</Text>
+              <Text style={{ color: theme.smallTextColor, fontSize: 16 }}>✕</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -104,39 +96,38 @@ export default function ExploreScreen() {
         <View
           style={[
             styles.mapBox,
-            { backgroundColor: boxBackground, borderColor: boxBorderColor },
+            { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor },
           ]}
         >
           <Text style={styles.mapEmoji}>🗺️</Text>
           <Text
             style={[
               styles.mapTitle,
-              { color: mainTextColor, fontFamily: font },
+              { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
             ]}
           >
             Map Loading...
           </Text>
         </View>
+
         <TouchableOpacity onPress={() => router.push("/arrived")}>
-          <Text>Test Arrived</Text>
+          <Text style={{ color: theme.mainTextColor, fontFamily: theme.font }}>Test Arrived</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push("/feedback")}>
-          <Text>Test Feedback</Text>
+          <Text style={{ color: theme.mainTextColor, fontFamily: theme.font }}>Test Feedback</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[
             styles.startButton,
             {
-              backgroundColor: buttonColor,
-              paddingVertical: btnPadding,
-              borderRadius: btnRadius,
+              backgroundColor: theme.buttonColor,
+              paddingVertical: theme.btnPadding,
+              borderRadius: theme.btnRadius,
               opacity: destination.length === 0 ? 0.5 : 1,
             },
           ]}
-          onPress={() =>
-            router.push({ pathname: "/journey", params: { destination } })
-          }
+          onPress={() => router.push({ pathname: "/journey", params: { destination } })}
           disabled={destination.length === 0}
           accessibilityRole="button"
           accessibilityLabel="Start Journey"
@@ -145,9 +136,10 @@ export default function ExploreScreen() {
             style={[
               styles.startButtonText,
               {
-                color: buttonTextColor,
-                fontSize: btnTextSize,
-                fontFamily: font,
+                color: theme.buttonTextColor,
+                fontSize: theme.btnTextSize,
+                fontFamily: theme.font,
+                letterSpacing: theme.letterSpacing,
               },
             ]}
           >
