@@ -10,7 +10,7 @@ export type SafetyRoute = {
     token: string
 }
 
-export async function fetchRoutes(source: LatLng, destination: LatLng, token: string): Promise<SafetyRoute[]> {
+export async function fetchRoutes(source: LatLng, destination: LatLng): Promise<Route[]> {
     const res = await fetch(ROUTE_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
