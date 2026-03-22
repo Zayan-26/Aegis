@@ -8,7 +8,6 @@ export default function TabLayout() {
     return (
         <Tabs
             screenOptions={{
-                // I have literally no idea why this is inverted 
                 tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
                 headerShown: false,
                 tabBarButton: HapticTab,

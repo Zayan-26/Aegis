@@ -116,7 +116,9 @@ export default function TrustedContactsScreen() {
 
   if (permissionDenied) {
     return (
-      <View style={[styles.container, styles.centered, { backgroundColor: theme.screenBackground }]}>
+      <View style={[styles.container, {backgroundColor: theme.screenBackground}]}>
+        <BackBtn/>
+      <View style={[styles.centered, { backgroundColor: theme.screenBackground }]}>
         <Text style={styles.permissionIcon}>🔒</Text>
         <Text style={[styles.permissionTitle, { color: theme.mainTextColor, fontFamily: theme.font }]}>
           Contacts Access Needed
@@ -139,7 +141,7 @@ export default function TrustedContactsScreen() {
             Go Back
           </Text>
         </TouchableOpacity> */}
-      <BackBtn/>
+      </View>
       </View>
     );
   }
@@ -377,7 +379,11 @@ export default function TrustedContactsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 24, paddingTop: 60 },
+  container: { 
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingTop: 70,
+  },
   centered: { flex: 1, alignItems: "center", justifyContent: "center" },
   header: { alignItems: "center", marginBottom: 16 },
   logo: {
