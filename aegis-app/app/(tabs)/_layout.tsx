@@ -1,5 +1,5 @@
-import { HapticTab } from "@/app-example/components/haptic-tab";
-import { Colors } from "@/app-example/constants/theme";
+import { HapticTab } from "@/app/components/haptic-tab";
+import { Colors } from "@/app/constants/theme";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Tabs } from "expo-router";
 import { useColorScheme } from "react-native";
