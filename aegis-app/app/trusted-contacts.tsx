@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
+import BackBtn from "@/components/back-button";
 
 interface Contact {
   id: string;
@@ -110,7 +111,7 @@ export default function TrustedContactsScreen() {
       return;
     }
     setTrustedContacts(trusted);
-    router.push("/(tabs)/travel");
+    router.push("/(tabs)/select-destination");
   };
 
   if (permissionDenied) {
@@ -123,7 +124,7 @@ export default function TrustedContactsScreen() {
         <Text style={[styles.permissionDesc, { color: theme.smallTextColor, fontFamily: theme.font, lineHeight: theme.lineH }]}>
           Aegis needs access to your contacts to add trusted companions. Please enable it in your phone settings.
         </Text>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={[
             styles.primaryButton,
             {
@@ -137,14 +138,15 @@ export default function TrustedContactsScreen() {
           <Text style={[styles.primaryButtonText, { color: theme.buttonTextColor, fontFamily: theme.font, fontSize: theme.btnTextSize }]}>
             Go Back
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+      <BackBtn/>
       </View>
     );
   }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
-      <TouchableOpacity onPress={() => router.back()} style={{ alignSelf: "flex-start", marginBottom: 8 }}>
+      {/* <TouchableOpacity onPress={() => router.back()} style={{ alignSelf: "flex-start", marginBottom: 8 }}>
         <Text
           style={{
             color: theme.mainTextColor,
@@ -156,7 +158,8 @@ export default function TrustedContactsScreen() {
         >
           ← Back
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
+      <BackBtn/>
 
       <View style={styles.header}>
         <Text style={[styles.logo, { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing }]}>
@@ -351,7 +354,7 @@ export default function TrustedContactsScreen() {
         <TouchableOpacity
           onPress={() => {
             setTrustedContacts([]);
-            router.push("/(tabs)/travel");
+            router.push("/(tabs)/select-destination");
           }}
         >
           <Text

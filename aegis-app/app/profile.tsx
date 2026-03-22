@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import {
   Alert,
   Linking,
-  SafeAreaView,
+  // SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -11,6 +11,8 @@ import {
   View,
 } from "react-native";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { SafeAreaView } from 'react-native-safe-area-context'
+import BackBtn from "@/components/back-button";
 
 export default function ProfileScreen() {
   const {
@@ -130,7 +132,7 @@ export default function ProfileScreen() {
 
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: theme.boxBorderColor }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+        {/* <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text
             style={[
               styles.backText,
@@ -139,7 +141,8 @@ export default function ProfileScreen() {
           >
             ← Back
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+        <BackBtn/>
         <Text
           style={[
             styles.headerTitle,

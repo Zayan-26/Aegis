@@ -1,21 +1,45 @@
 import { router } from "expo-router";
 import { useState } from "react";
+// import GetLocation from "react-native-get-location"
+import { SafeAreaView } from 'react-native-safe-area-context'
 import {
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
+import BrumMap from "@/components/map";
+import { Poi } from "@/apis/request-poi";
+import { fetchRoutes } from "@/apis/request-route";
+import { LatLng } from "react-native-maps";
+import { useSafetyRoutes } from "@/contexts/RoutingContext"
+import * as Location from "expo-location"
+
+const selectRoute = async (destination: LatLng) => {
+  let {status} = await Location.requestForegroundPermissionsAsync()
+  if(status != 'granted') throw Error("Permission Denied.")
+  // GetLocation.getCurrentPosition({
+  //   enableHighAccuracy: true,
+  //   timeout: 60000
+  // }).then(async source => {
+  //   const routes = await fetchRoutes(source, destination)
+  //   const { setCandidateRoutes } = useSafetyRoutes();
+  //   setCandidateRoutes(routes)
+  //   router.push("/select-route")
+  // })
+  Location.getLastKnownPositionAsync().then(async source => {
+    const routes = await fetchRoutes({latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0}, destination)
+    const { setCandidateRoutes } = useSafetyRoutes();
+    setCandidateRoutes(routes)
+    router.push("/select-route")
+  })
+};
 
 export default function ExploreScreen() {
   const { highContrast, largeButtons, theme } = useAccessibility();
-  const [destination, setDestination] = useState("");
-
-  const inputSize = largeButtons ? 18 : 16;
+  const [destination, setDestination] = useState<Poi | null>(null);
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
@@ -60,7 +84,7 @@ export default function ExploreScreen() {
         </View>
 
         {/* ── Destination input ── */}
-        <View
+        {/* <View
           style={[
             styles.inputBox,
             {
@@ -91,7 +115,7 @@ export default function ExploreScreen() {
               <Text style={{ color: theme.smallTextColor, fontSize: 16 }}>✕</Text>
             </TouchableOpacity>
           )}
-        </View>
+        </View> */}
 
         <View
           style={[
@@ -99,7 +123,7 @@ export default function ExploreScreen() {
             { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor },
           ]}
         >
-          <Text style={styles.mapEmoji}>🗺️</Text>
+          {/* <Text style={styles.mapEmoji}>🗺️</Text>
           <Text
             style={[
               styles.mapTitle,
@@ -107,15 +131,16 @@ export default function ExploreScreen() {
             ]}
           >
             Map Loading...
-          </Text>
+          </Text> */}
+          <BrumMap poiSelectCallback={setDestination} />
         </View>
-
+        {/* 
         <TouchableOpacity onPress={() => router.push("/arrived")}>
           <Text style={{ color: theme.mainTextColor, fontFamily: theme.font }}>Test Arrived</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => router.push("/feedback")}>
           <Text style={{ color: theme.mainTextColor, fontFamily: theme.font }}>Test Feedback</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         <TouchableOpacity
           style={[
@@ -124,11 +149,12 @@ export default function ExploreScreen() {
               backgroundColor: theme.buttonColor,
               paddingVertical: theme.btnPadding,
               borderRadius: theme.btnRadius,
-              opacity: destination.length === 0 ? 0.5 : 1,
+              opacity: destination == null ? 0.5 : 1,
             },
           ]}
-          onPress={() => router.push({ pathname: "/journey", params: { destination } })}
-          disabled={destination.length === 0}
+          // onPress={() => router.push({ pathname: "/select-route"})}
+          onPress={async () => await selectRoute({latitude: destination?.poi_lat ?? 0, longitude: destination?.poi_lng ?? 0})}
+          disabled={destination == null}
           accessibilityRole="button"
           accessibilityLabel="Start Journey"
         >
@@ -192,10 +218,11 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 20,
     borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    padding: 24,
+    overflow: "hidden",
+    alignItems: "stretch",
+    justifyContent: "flex-start",
+    // gap: 10,
+    // padding: 24,
   },
   mapEmoji: { fontSize: 56 },
   mapTitle: { fontSize: 18, fontWeight: "700" },
@@ -204,7 +231,7 @@ const styles = StyleSheet.create({
   startButton: {
     width: "100%",
     alignItems: "center",
-    marginBottom: 16,
+    // marginBottom: 2,
   },
   startButtonText: { fontWeight: "700" },
 });

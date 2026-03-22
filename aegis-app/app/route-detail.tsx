@@ -2,7 +2,7 @@ import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import {
-  SafeAreaView,
+  // SafeAreaView,
   StatusBar,
   StyleSheet,
   Switch,
@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { SafeAreaView } from 'react-native-safe-area-context'
+import BackBtn from "@/components/back-button";
 
 const ROUTE_DATA: Record<
   string,
@@ -92,7 +94,7 @@ export default function RouteDetailScreen() {
 
         {/* Top bar */}
         <View style={[styles.topBar, { borderBottomColor: theme.boxBorderColor }]}>
-          <TouchableOpacity onPress={() => router.back()}>
+          {/* <TouchableOpacity onPress={() => router.back()}>
             <Text
               style={{
                 fontSize: 16,
@@ -104,7 +106,8 @@ export default function RouteDetailScreen() {
             >
               ← Back
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
+          <BackBtn/>
           <TouchableOpacity onPress={() => router.push("/profile")}>
             <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
           </TouchableOpacity>

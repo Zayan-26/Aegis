@@ -3,7 +3,6 @@ import { Colors } from "@/app-example/constants/theme";
 import { IconSymbol } from "@/components/ui/icon-symbol";
 import { Tabs } from "expo-router";
 import { useColorScheme } from "react-native";
-
 export default function TabLayout() {
     const colorScheme = useColorScheme();
     return (
@@ -22,7 +21,7 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="travel"
+                name="select-destination"
                 options={{
                     title: 'Travel',
                     tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,

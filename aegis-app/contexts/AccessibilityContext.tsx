@@ -31,6 +31,7 @@ export type AccessibilityTheme = {
   boxBorderColor: string;
   buttonColor: string;
   buttonTextColor: string;
+  interactableTextColor: string
 
   font?: string;
   letterSpacing: number;
@@ -65,6 +66,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     const boxBorderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
     const buttonColor = colorBlind ? "#E69F00" : "#69B7C6";
     const buttonTextColor = colorBlind ? "#000000" : "#FFFFFF";
+    const interactableTextColor = highContrast ? "#E69F00": "#477d87"
 
     const font = dyslexic ? "OpenDyslexic" : undefined;
     const letterSpacing = dyslexic ? 1 : 0;
@@ -87,6 +89,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
       boxBorderColor,
       buttonColor,
       buttonTextColor,
+      interactableTextColor,
       font,
       letterSpacing,
       lineH,

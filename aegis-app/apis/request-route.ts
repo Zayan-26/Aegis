@@ -1,7 +1,7 @@
 import { LatLng } from "react-native-maps"
 import { ROUTE_ENDPOINT } from "./endpoints"
 
-export type Route = {
+export type SafetyRoute = {
     coordinateArray: LatLng[],
     safetyScore: number
     duration: number,
@@ -9,7 +9,7 @@ export type Route = {
     UUID: number
 }
 
-export async function fetchRoutes(source: LatLng, destination: LatLng): Promise<Route[]> {
+export async function fetchRoutes(source: LatLng, destination: LatLng): Promise<SafetyRoute[]> {
     const res = await fetch(ROUTE_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

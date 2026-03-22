@@ -1,17 +1,15 @@
-// app/journey.tsx
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import {
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const ROUTES = [
   {
@@ -45,7 +43,7 @@ export default function JourneyScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.screenBackground }}>
+    // <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.screenBackground }}>
       <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
         <StatusBar
           barStyle={highContrast ? "light-content" : "dark-content"}
@@ -223,7 +221,7 @@ export default function JourneyScreen() {
           </BottomSheetScrollView>
         </BottomSheet>
       </SafeAreaView>
-    </GestureHandlerRootView>
+    // </GestureHandlerRootView>
   );
 }
 

@@ -1,9 +1,11 @@
+import BackBtn from "@/components/back-button";
 import { router } from "expo-router";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function CreateAccountScreen(){
     return(
         <View style={styles.container}>
+        <BackBtn/>
             <View style={styles.header}>
                 <Text style={styles.logo}>aegis</Text>
                 <Text style={styles.title}>Create Account</Text>
@@ -46,9 +48,9 @@ export default function CreateAccountScreen(){
                         Already have an account? <Text style={styles.linkHighlight}> Sign In</Text>
                     </Text>
                 </TouchableOpacity>
-            <TouchableOpacity onPress={()=> router.back()}>
+            {/* <TouchableOpacity onPress={()=> router.back()}>
             <Text style={styles.backText}>Back</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );

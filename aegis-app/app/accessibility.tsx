@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
+import BackBtn from "@/components/back-button";
 
 export default function AccessibilityScreen() {
   const {
@@ -64,7 +65,7 @@ export default function AccessibilityScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
       {/* Back button */}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => router.back()}
         style={{ alignSelf: "flex-start", marginBottom: 8 }}
       >
@@ -72,14 +73,15 @@ export default function AccessibilityScreen() {
           style={{
             color: theme.mainTextColor,
             fontSize: 16,
-            fontWeight: "600",
+            fontWeight: "500",
             fontFamily: theme.font,
             letterSpacing: theme.letterSpacing,
           }}
         >
           ← Back
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
+      <BackBtn/>
 
       {/* Header */}
       <View style={styles.header}>
@@ -260,7 +262,7 @@ export default function AccessibilityScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.back()}>
+        {/* <TouchableOpacity onPress={() => router.back()}>
           <Text
             style={[
               styles.backText,
@@ -274,7 +276,7 @@ export default function AccessibilityScreen() {
           >
             Back
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );
