@@ -1,3 +1,5 @@
+import BackBtn from "@/components/back-button";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useRef, useState } from "react";
@@ -11,9 +13,7 @@ import {
   View,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useAccessibility } from "@/contexts/AccessibilityContext";
-import { SafeAreaView } from 'react-native-safe-area-context'
-import BackBtn from "@/components/back-button";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ROUTE_DATA: Record<
   string,
@@ -67,7 +67,14 @@ export default function RouteDetailScreen() {
     destination: string;
   }>();
 
-  const { highContrast, largeButtons, trustedContacts, notifyOn, setNotifyOn, theme } = useAccessibility();
+  const {
+    highContrast,
+    largeButtons,
+    trustedContacts,
+    notifyOn,
+    setNotifyOn,
+    theme,
+  } = useAccessibility();
   const route = ROUTE_DATA[routeId ?? "safest"];
 
   const [sharedContacts, setSharedContacts] = useState<Record<string, boolean>>(
@@ -75,7 +82,7 @@ export default function RouteDetailScreen() {
   );
 
   const bottomSheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["15%", "50%", "88%"], []);
+  const sheetHeights = useMemo(() => ["15%", "50%", "88%"], []);
 
   const routeColor = highContrast ? "#FFFFFF" : route.color;
   const routeBg = highContrast ? "#2A2A2A" : route.bgColor;
@@ -85,15 +92,20 @@ export default function RouteDetailScreen() {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.screenBackground }}>
-      <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
+    <GestureHandlerRootView
+      style={{ flex: 1, backgroundColor: theme.screenBackground }}
+    >
+      <SafeAreaView
+        style={[styles.safe, { backgroundColor: theme.screenBackground }]}
+      >
         <StatusBar
           barStyle={highContrast ? "light-content" : "dark-content"}
           backgroundColor={theme.screenBackground}
         />
 
-        {/* Top bar */}
-        <View style={[styles.topBar, { borderBottomColor: theme.boxBorderColor }]}>
+        <View
+          style={[styles.topBar, { borderBottomColor: theme.boxBorderColor }]}
+        >
           {/* <TouchableOpacity onPress={() => router.back()}>
             <Text
               style={{
@@ -107,30 +119,40 @@ export default function RouteDetailScreen() {
               ← Back
             </Text>
           </TouchableOpacity> */}
-          <BackBtn/>
+          <BackBtn />
           <TouchableOpacity onPress={() => router.push("/profile")}>
             <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Map placeholder */}
-        <View style={[styles.mapBox, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
+        <View
+          style={[
+            styles.mapBox,
+            {
+              backgroundColor: theme.boxBackground,
+              borderColor: theme.boxBorderColor,
+            },
+          ]}
+        >
           <Text style={styles.mapEmoji}>🗺️</Text>
           <Text
             style={[
               styles.mapSubtitle,
-              { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+              {
+                color: theme.smallTextColor,
+                fontFamily: theme.font,
+                letterSpacing: theme.letterSpacing,
+              },
             ]}
           >
             Live route will appear here
           </Text>
         </View>
 
-        {/* Draggable bottom sheet */}
         <BottomSheet
           ref={bottomSheetRef}
           index={1}
-          snapPoints={snapPoints}
+          snapPoints={sheetHeights}
           backgroundStyle={{ backgroundColor: theme.boxBackground }}
           handleIndicatorStyle={{
             backgroundColor: theme.boxBorderColor,
@@ -138,8 +160,10 @@ export default function RouteDetailScreen() {
             height: 4,
           }}
         >
-          <BottomSheetScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
-            {/* Route title + destination */}
+          <BottomSheetScrollView
+            contentContainerStyle={styles.sheetContent}
+            showsVerticalScrollIndicator={false}
+          >
             <View style={styles.routeTitleRow}>
               <Text
                 style={[
@@ -157,15 +181,23 @@ export default function RouteDetailScreen() {
               <Text
                 style={[
                   styles.routeDestination,
-                  { color: routeColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+                  {
+                    color: routeColor,
+                    fontFamily: theme.font,
+                    letterSpacing: theme.letterSpacing,
+                  },
                 ]}
               >
                 {destination}
               </Text>
             </View>
 
-            {/* Route info card */}
-            <View style={[styles.infoCard, { backgroundColor: routeBg, borderColor: routeColor }]}>
+            <View
+              style={[
+                styles.infoCard,
+                { backgroundColor: routeBg, borderColor: routeColor },
+              ]}
+            >
               <View style={styles.infoCardTop}>
                 <View style={styles.infoCardLeft}>
                   <Text
@@ -179,12 +211,18 @@ export default function RouteDetailScreen() {
                       },
                     ]}
                   >
-                    {route.score ? `Safety Score: ${route.score}` : "⚠️ Lower safety score"}
+                    {route.score
+                      ? `Safety Score: ${route.score}`
+                      : "⚠️ Lower safety score"}
                   </Text>
                   <Text
                     style={[
                       styles.infoDistance,
-                      { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+                      {
+                        color: theme.smallTextColor,
+                        fontFamily: theme.font,
+                        letterSpacing: theme.letterSpacing,
+                      },
                     ]}
                   >
                     📍 {route.distance}
@@ -219,8 +257,15 @@ export default function RouteDetailScreen() {
               </View>
             </View>
 
-            {/* Share with trusted contacts */}
-            <View style={[styles.card, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
+            <View
+              style={[
+                styles.card,
+                {
+                  backgroundColor: theme.boxBackground,
+                  borderColor: theme.boxBorderColor,
+                },
+              ]}
+            >
               <View style={styles.cardHeader}>
                 <Text style={{ fontSize: 20 }}>👥</Text>
                 <Text
@@ -241,15 +286,28 @@ export default function RouteDetailScreen() {
                 <Text
                   style={[
                     styles.noContactsText,
-                    { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+                    {
+                      color: theme.smallTextColor,
+                      fontFamily: theme.font,
+                      letterSpacing: theme.letterSpacing,
+                    },
                   ]}
                 >
                   No trusted contacts added. Go back and add some.
                 </Text>
               ) : (
                 trustedContacts.map((contact) => (
-                  <View key={contact.id} style={[styles.contactRow, { borderTopColor: theme.boxBorderColor }]}>
-                    <Avatar name={contact.name} color={highContrast ? "#FFFFFF" : theme.buttonColor} />
+                  <View
+                    key={contact.id}
+                    style={[
+                      styles.contactRow,
+                      { borderTopColor: theme.boxBorderColor },
+                    ]}
+                  >
+                    <Avatar
+                      name={contact.name}
+                      color={highContrast ? "#FFFFFF" : theme.buttonColor}
+                    />
                     <Text
                       style={[
                         styles.contactName,
@@ -278,8 +336,15 @@ export default function RouteDetailScreen() {
               )}
             </View>
 
-            {/* Notification toggle */}
-            <View style={[styles.card, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
+            <View
+              style={[
+                styles.card,
+                {
+                  backgroundColor: theme.boxBackground,
+                  borderColor: theme.boxBorderColor,
+                },
+              ]}
+            >
               <View style={styles.cardHeader}>
                 <Text
                   style={[
@@ -322,7 +387,6 @@ export default function RouteDetailScreen() {
               )}
             </View>
 
-            {/* Start Navigation */}
             <TouchableOpacity
               style={[
                 styles.startBtn,
