@@ -19,6 +19,7 @@ interface AccessibilityContextType {
   setNotifyOn: (val: boolean) => void;
   trustedContacts: TrustedContact[];
   setTrustedContacts: (contacts: TrustedContact[]) => void;
+  
   theme: AccessibilityTheme;
 }
 

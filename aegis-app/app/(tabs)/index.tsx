@@ -1,7 +1,13 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { router } from "expo-router";
+import { useEffect } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function WelcomeScreen() {
+  const {loggedIn} = useAuth()
+useEffect(() => {
+  if(loggedIn) router.push("/(tabs)/select-destination")
+  })
 return(
 <View style={styles.container}>
 <View style={styles.topSection}>

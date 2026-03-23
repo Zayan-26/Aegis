@@ -1,33 +1,36 @@
-import { createAccount } from "@/apis/authentication";
+import { create } from "@/apis/authentication";
 import BackBtn from "@/components/back-button";
 import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Toast } from "toastify-react-native";
 
-async function registerBtn(fullName: string, email: string, password: string, confirmpwd: string, clearpwdCallback: void) {
-  if (password !== confirmpwd) {
+async function registerBtn(fullName: string, email: string, password: string, confirmpwd: string, clearpwdCallback: () => void) {
+  if (fullName.length <= 0 || email.length <= 0 || password.length <= 0 || confirmpwd.length <= 0) {
+    Toast.error('Input cannot be empty.')
+  }
+  else if (password !== confirmpwd) {
     Toast.error('Passwords do not match.')
-    clearpwdCallback
   }
   else {
-    const err = await createAccount(fullName, email, password)
+    const err = await create(fullName, email, password)
     if (err) {
       Toast.error(err.message)
-      router.replace('/')
+      // router.replace('/')
     } else {
       Toast.success("Account creation successful.")
       router.back()
     }
   }
+  clearpwdCallback()
 }
 
 export default function CreateAccountScreen() {
-  // var fullName: string
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [passwd, setPasswd] = useState('')
   const [rpasswd, setRPasswd] = useState('')
+
   return (
     <View style={styles.container}>
       <BackBtn />
@@ -43,30 +46,35 @@ export default function CreateAccountScreen() {
           placeholderTextColor="#7A869A"
           style={styles.input}
           onChangeText={setFullName}
-          />
+        />
         <TextInput
           placeholder="Email Address"
           placeholderTextColor="#7A869A"
           style={styles.input}
           onChangeText={setEmail}
-          />
+        />
         <TextInput
           placeholder="Password"
           placeholderTextColor="#7A869A"
           secureTextEntry
           style={styles.input}
           onChangeText={setPasswd}
-          />
+          value={passwd}
+        />
         <TextInput
           placeholder="Confirm Password"
           placeholderTextColor="#7A869A"
           secureTextEntry
           style={styles.input}
           onChangeText={setRPasswd}
-          />
+          value={rpasswd}
+        />
         <TouchableOpacity
           style={styles.createAccountButton}
-          onPress={async () => await registerBtn(fullName, email, passwd, rpasswd)}>
+          onPress={async () => await registerBtn(fullName, email, passwd, rpasswd, () => {
+            setPasswd("")
+            setRPasswd("")
+          })}>
 
           <Text style={styles.createAccountButtonText}>Create Account</Text>
         </TouchableOpacity>
