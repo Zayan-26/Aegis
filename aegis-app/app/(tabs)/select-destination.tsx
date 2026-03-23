@@ -159,7 +159,7 @@ export default function ExploreScreen() {
           >
             Map Loading...
           </Text> */}
-          <BrumMap poiSelectCallback={setDestination} />
+          <BrumMap poiSelectCallback={setDestination}/>
         </View>
         {/* 
         <TouchableOpacity onPress={() => router.push("/arrived")}>

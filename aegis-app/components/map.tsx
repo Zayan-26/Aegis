@@ -187,7 +187,7 @@ export default function BrumMap() {
         onPress={onShortPress}
         minZoomLevel={16}
         maxZoomLevel={19}
-        showsPointsOfInterest={false}
+        // showsPointsOfInterest={false}
       >
 <<<<<<< HEAD
         <UrlTile urlTemplate={highContrast? DARK_TILE_URL: BASE_TILE_URL} shouldReplaceMapContent />
