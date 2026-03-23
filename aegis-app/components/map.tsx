@@ -44,7 +44,6 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
   }, []);
 
   const openSheet = useCallback(() => {
-    // expand() opens it to the largest snap point; snapToIndex(1) opens to mid
     sheetRef.current?.snapToIndex(1);
   }, []);
 
@@ -78,7 +77,6 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
     poiSelectCallback(null)
   }, [closeSheet]);
 
-  // Auto-open the sheet when we have results for a destination
   useEffect(() => {
     if (!destination) return;
     if (poisLoading) return;
