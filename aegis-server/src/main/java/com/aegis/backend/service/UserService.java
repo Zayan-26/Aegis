@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -24,9 +27,12 @@ public class UserService {
         }
 
         User user = new User();
+        user.setUserId(UUID.randomUUID().toString());
+        user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
-        user.setUsername(request.getUsername());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
+        user.setActive(true);
+        user.setCreatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
     }
@@ -35,11 +41,11 @@ public class UserService {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new RuntimeException("Invalid password");
         }
 
         String token = jwtUtil.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail(), user.getUsername());
+        return new AuthResponse(token, user.getEmail(), user.getFullName());
     }
 }
