@@ -1,54 +1,82 @@
+import { createAccount } from "@/apis/authentication";
 import BackBtn from "@/components/back-button";
 import { router } from "expo-router";
+import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Toast } from "toastify-react-native";
 
-export default function CreateAccountScreen(){
-    return(
-        <View style={styles.container}>
-        <BackBtn/>
-            <View style={styles.header}>
-                <Text style={styles.logo}>aegis</Text>
-                <Text style={styles.title}>Create Account</Text>
-                <Text style={styles.subtitle}>Set up your account to start navigation safely</Text>
-             </View>
+async function registerBtn(fullName: string, email: string, password: string, confirmpwd: string, clearpwdCallback: void) {
+  if (password !== confirmpwd) {
+    Toast.error('Passwords do not match.')
+    clearpwdCallback
+  }
+  else {
+    const err = await createAccount(fullName, email, password)
+    if (err) {
+      Toast.error(err.message)
+      router.replace('/')
+    } else {
+      Toast.success("Account creation successful.")
+      router.back()
+    }
+  }
+}
 
-         <View style={styles.form}>
-                    <TextInput
-                    placeholder="Full name"
-                    placeholderTextColor="#7A869A"
-                    style={styles.input}
-                    />
-                <TextInput 
-                placeholder="Email address"
-                placeholderTextColor="#7A869A"
-                secureTextEntry
-                style={styles.input}
-                />
-                <TextInput 
-                placeholder="Password"
-                placeholderTextColor="#7A869A"
-                secureTextEntry
-                style={styles.input}
-                />
-                <TextInput 
-                placeholder="Confirm password"
-                placeholderTextColor="#7A869A"
-                secureTextEntry
-                style={styles.input}
-                />
-                <TouchableOpacity 
-                style={styles.createAccountButton}
-                onPress={() => router.push("/accessibility")}>
-                
-                    <Text style={styles.createAccountButtonText}>Create Account</Text>
-                </TouchableOpacity>
-        
-                <TouchableOpacity onPress={() => router.push("/create-account")}>
-                    <Text style={styles.linkText}>
-                        Already have an account? <Text style={styles.linkHighlight}> Sign In</Text>
-                    </Text>
-                </TouchableOpacity>
-            {/* <TouchableOpacity onPress={()=> router.back()}>
+export default function CreateAccountScreen() {
+  // var fullName: string
+  const [fullName, setFullName] = useState('')
+  const [email, setEmail] = useState('')
+  const [passwd, setPasswd] = useState('')
+  const [rpasswd, setRPasswd] = useState('')
+  return (
+    <View style={styles.container}>
+      <BackBtn />
+      <View style={styles.header}>
+        <Text style={styles.logo}>aegis</Text>
+        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.subtitle}>Set up your account to start navigation safely</Text>
+      </View>
+
+      <View style={styles.form}>
+        <TextInput
+          placeholder="Display Name"
+          placeholderTextColor="#7A869A"
+          style={styles.input}
+          onChangeText={setFullName}
+          />
+        <TextInput
+          placeholder="Email Address"
+          placeholderTextColor="#7A869A"
+          style={styles.input}
+          onChangeText={setEmail}
+          />
+        <TextInput
+          placeholder="Password"
+          placeholderTextColor="#7A869A"
+          secureTextEntry
+          style={styles.input}
+          onChangeText={setPasswd}
+          />
+        <TextInput
+          placeholder="Confirm Password"
+          placeholderTextColor="#7A869A"
+          secureTextEntry
+          style={styles.input}
+          onChangeText={setRPasswd}
+          />
+        <TouchableOpacity
+          style={styles.createAccountButton}
+          onPress={async () => await registerBtn(fullName, email, passwd, rpasswd)}>
+
+          <Text style={styles.createAccountButtonText}>Create Account</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.navigate('/login')}>
+          <Text style={styles.linkText}>
+            Already have an account? <Text style={styles.linkHighlight}> Sign In</Text>
+          </Text>
+        </TouchableOpacity>
+        {/* <TouchableOpacity onPress={()=> router.back()}>
             <Text style={styles.backText}>Back</Text>
         </TouchableOpacity> */}
       </View>
@@ -104,7 +132,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     marginTop: 8,
-    borderWidth:1,
+    borderWidth: 1,
   },
   createAccountButtonText: {
     color: "#FFFFFF",
@@ -131,8 +159,7 @@ const styles = StyleSheet.create({
 });
 
 
-            
-            
 
 
-    
+
+

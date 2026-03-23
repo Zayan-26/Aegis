@@ -62,23 +62,26 @@ export default function ExploreScreen() {
             <Text
               style={[
                 styles.welcomeText,
-                { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+                { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing + 1, fontSize: (theme.dyslexicFontSize ?? 16) - 1},
               ]}
             >
               Navigate safely. Travel confidently.
             </Text>
             <Text
               style={[
-                styles.headingText,
+                // styles.headingText,
                 {
+                  fontWeight: 500,
                   color: theme.mainTextColor,
                   fontFamily: theme.font,
-                  fontSize: largeButtons ? 28 : 22,
+                  // fontSize: largeButtons ? 28 : 22,
+                  fontSize: (theme.dyslexicFontSize ?? 16) + 3,
                   letterSpacing: theme.letterSpacing,
                 },
               ]}
             >
-              Welcome Back !
+              {/* Welcome Back ! */}
+              Hold-tap on Map to Select Destination.
             </Text>
           </View>
         </View>
@@ -132,7 +135,7 @@ export default function ExploreScreen() {
           >
             Map Loading...
           </Text> */}
-          <BrumMap poiSelectCallback={setDestination} />
+          <BrumMap poiSelectCallback={setDestination}/>
         </View>
         {/* 
         <TouchableOpacity onPress={() => router.push("/arrived")}>
@@ -169,7 +172,7 @@ export default function ExploreScreen() {
               },
             ]}
           >
-            Start Journey
+          {destination != null ? "Start Journey" : "Select Destination"}
           </Text>
         </TouchableOpacity>
       </View>

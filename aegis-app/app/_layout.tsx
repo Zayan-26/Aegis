@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
 import { RoutingProvider } from "@/contexts/RoutingContext";
+import ToastManager from 'toastify-react-native'
 
 SplashScreen.preventAutoHideAsync();
 
@@ -18,15 +19,16 @@ export default function RootLayout() {
     if (loaded || error) SplashScreen.hideAsync()
   }, [loaded, error])
 
-  if(!loaded && !error) return null
+  if (!loaded && !error) return null
 
   return (
     <RoutingProvider>
-      <AccessibilityProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <Stack screenOptions={{ headerShown: false }} />
-        </GestureHandlerRootView>
-      </AccessibilityProvider>
-    </RoutingProvider>
+        <ToastManager/>
+        <AccessibilityProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack screenOptions={{ headerShown: false }} />
+          </GestureHandlerRootView>
+        </AccessibilityProvider>
+      </RoutingProvider>
   );
 }

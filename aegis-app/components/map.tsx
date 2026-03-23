@@ -15,8 +15,8 @@ type DestinationMarker = {
 const INITIAL_REGION: Region = {
   latitude: 52.4778995,
   longitude: -1.900092,
-  latitudeDelta: 0.0174604,
-  longitudeDelta: 0.028236,
+  latitudeDelta: 0.02,
+  longitudeDelta: 0.02,
 };
 
 type BrumMapProps = {
@@ -28,7 +28,7 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
   const mapRef = useRef<MapView | null>(null);
 
   const sheetRef = useRef<BottomSheet>(null);
-  const snapPoints = useMemo(() => ["20%", "45%", "75%"], []);
+  const snapPoints = useMemo(() => ["20%", "45%"], []);
 
   const [destination, setDestination] = useState<DestinationMarker | null>(null);
 
@@ -125,7 +125,7 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
         onPress={onShortPress}
         minZoomLevel={16}
         maxZoomLevel={19}
-        showsPointsOfInterest={false}
+        // showsPointsOfInterest={false}
       >
         <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
 
