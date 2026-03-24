@@ -125,7 +125,7 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
         onPress={onShortPress}
         minZoomLevel={16}
         maxZoomLevel={19}
-        // showsPointsOfInterest={false}
+        showsPointsOfInterest={false}
       >
         <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
 

@@ -15,6 +15,22 @@ import MapView, { Polyline, UrlTile } from "react-native-maps";
 import { TILE_URL } from "@/apis/endpoints";
 import { useSafetyRoutes } from "@/contexts/RoutingContext";
 import { InternalRoutes } from "@/constants/routes";
+import { SafetyRoute } from "@/apis/request-route";
+
+const RouteConstants = {
+  safest: {
+    label: "Safest Route",
+    borderColor: "#2D7D6F",
+    bgColor: "#F0FAF8",
+    textColor: "#2D7D6F",
+  },
+  fastest: {
+    label: "Fastest Route",
+    borderColor: "#E5A0A0",
+    bgColor: "#FFF5F5",
+    textColor: "#C0392B",
+  }
+}
 
 const ROUTES = [
   {
@@ -248,10 +264,32 @@ function safetyColor(score: number): string {
 }
 
 function RouteSelection() {
-  const { theme } = useAccessibility();
+  const { theme, highContrast } = useAccessibility();
   const { destination } = useSafetyRoutes()
+  //Internal Routes are placeholders, just uncomment the next line and comment the next one out / delete the next one.
   // const { candidateRoutes } = useSafetyRoutes();
   const candidateRoutes = InternalRoutes
+  type ThemeRoutePair = {
+    theme: {
+      label: string
+      borderColor: string,
+      bgColor: string,
+      textColor: string
+    },
+    route: SafetyRoute
+  }
+  const safest: ThemeRoutePair = {
+    theme: RouteConstants.safest,
+    route: candidateRoutes.sort((a, b) => a.safetyScore - b.safetyScore)[0],
+  }
+
+  const fastest: ThemeRoutePair = {
+    theme: RouteConstants.fastest,
+    route: candidateRoutes.sort((a, b) => b.duration - a.duration)[0],
+  }
+
+  const [selectedRoute, setSelectedRoute] = useState(safest.route)
+
   const allCoords = candidateRoutes.flatMap(route => route.coordinateArray);
 
   const lats = allCoords.map(c => c.latitude);
@@ -262,7 +300,7 @@ function RouteSelection() {
   const minLng = Math.min(...lngs);
   const maxLng = Math.max(...lngs);
 
-  const latPadding = 0.01; // tweak these values as needed
+  const latPadding = 0.01;
   const lngPadding = 0.01;
 
   const region = {
@@ -282,24 +320,24 @@ function RouteSelection() {
         <MapView
           style={{ flex: 1 }}
           mapType="none"
-          // showsPointsOfInterest={false}
+          showsPointsOfInterest={false}
           // pitchEnabled={false}
           // scrollEnabled={false}
           region={region}
         >
           <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
-          {candidateRoutes.map(route => (
+          {[safest, fastest].map(({theme, route}, _) => (
             <Polyline
-              key={route.UUID}
+              key={route.token}
               coordinates={route.coordinateArray}
               strokeWidth={4}
-              strokeColor={safetyColor(route.safetyScore)}
+              strokeColor={theme.textColor}
             />
           ))}
         </MapView>
         <BottomSheet
           index={1}
-          snapPoints={["40%", "70%"]}
+          snapPoints={["20%", "70%"]}
           backgroundStyle={[styles.sheetBg, { backgroundColor: theme.boxBackground }]}
           handleIndicatorStyle={{
             backgroundColor: theme.boxBorderColor,
@@ -326,99 +364,96 @@ function RouteSelection() {
                 {destination}
               </Text>
             </View>
-            {ROUTES.map((route) => {
-              const isSelected = selectedRoute === route.id;
-              const routeBg = highContrast
-                ? isSelected
-                  ? "#333333"
-                  : "#1A1A1A"
-                : route.bgColor;
-              const routeBorder = highContrast
-                ? isSelected
-                  ? "#FFFFFF"
-                  : "#444444"
-                : route.borderColor;
-              const routeTextColor = highContrast ? "#FFFFFF" : route.textColor;
-              const routeDescColor = highContrast ? "#CCCCCC" : "#4F647A";
-
-              return (
-                <TouchableOpacity
-                  key={route.id}
-                  style={[
-                    styles.routeCard,
-                    {
-                      backgroundColor: routeBg,
-                      borderColor: routeBorder,
-                      borderWidth: isSelected ? 2 : 1,
-                      padding: largeButtons ? 16 : 12,
-                    },
-                  ]}
-                  onPress={() => {
-                    setSelectedRoute(route.id);
-                    router.push({
-                      pathname: "/route-detail",
-                      params: { routeId: route.id, destination },
-                    });
-                  }}
-                  accessibilityRole="button"
-                  accessibilityLabel={route.label}
-                >
-                  <View style={styles.routeLeft}>
-                    <View style={styles.routeInfo}>
-                      <Text
-                        style={[
-                          styles.routeLabel,
-                          {
-                            color: routeTextColor,
-                            fontFamily: theme.font,
-                            fontSize: theme.labelSize,
-                            letterSpacing: theme.letterSpacing,
-                          },
-                        ]}
-                      >
-                        {route.label}
-                      </Text>
-                      {route.score && (
-                        <Text
-                          style={[
-                            styles.routeScore,
-                            { color: routeTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
-                          ]}
-                        >
-                          Safety score: {route.score}
-                        </Text>
-                      )}
-                      <Text
-                        style={[
-                          styles.routeDesc,
-                          {
-                            color: routeDescColor,
-                            fontFamily: theme.font,
-                            letterSpacing: theme.letterSpacing,
-                            lineHeight: theme.lineH,
-                          },
-                        ]}
-                      >
-                        {route.description}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text
+            {
+              [safest, fastest].map(({theme: routeTheme, route}, _) => {
+                const isSelected = selectedRoute.token === route.token
+                const routeBg = highContrast
+                  ? isSelected
+                    ? "#333333"
+                    : "#1A1A1A"
+                  : routeTheme.bgColor;
+                const routeBorder = highContrast
+                  ? isSelected
+                    ? "#FFFFFF"
+                    : "#444444"
+                  : routeTheme.borderColor;
+                const routeTextColor = highContrast ? "#FFFFFF" : routeTheme.textColor;
+                const routeDescColor = highContrast ? "#CCCCCC" : "#4F647A";
+                return (
+                  <TouchableOpacity
+                    key={route.token}
                     style={[
-                      styles.routeTime,
+                      styles.routeCard,
                       {
-                        color: routeTextColor,
-                        fontFamily: theme.font,
-                        fontSize: theme.labelSize + 2,
-                        letterSpacing: theme.letterSpacing,
+                        backgroundColor: routeBg,
+                        borderColor: routeBorder,
+                        borderWidth: isSelected ? 2 : 1,
+                        padding:theme.btnRadius - 4
                       },
                     ]}
+                    onPress={() => {
+                      setSelectedRoute(route);
+                      router.push({
+                        pathname: "/route-detail",
+                        params: { routeId: route.token, destination },
+                      });
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel={routeTheme.label}
                   >
-                    {route.time}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
+                    <View style={styles.routeLeft}>
+                      <View style={styles.routeInfo}>
+                        <Text
+                          style={[
+                            styles.routeLabel,
+                            {
+                              color: routeTextColor,
+                              fontFamily: theme.font,
+                              fontSize: theme.labelSize,
+                              letterSpacing: theme.letterSpacing,
+                            },
+                          ]}
+                        >
+                          {routeTheme.label}
+                        </Text>
+                        {route.safetyScore && (
+                          <Text
+                            style={[
+                              styles.routeScore,
+                              { color: routeTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+                            ]}
+                          >
+                            Safety score: {route.safetyScore}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                    <Text
+                      style={[
+                        styles.routeTime,
+                        {
+                          color: routeTextColor,
+                          fontFamily: theme.font,
+                          fontSize: theme.labelSize + 2,
+                          letterSpacing: theme.letterSpacing,
+                        },
+                      ]}
+                    >
+                      {
+                        ~~(route.duration / 60) > 0 ?  ` ${~~(route.duration / 60)} Hr `  : '' 
+                      }
+                      {
+                          route.duration % 60 > 0 ? `${route.duration % 60} Mins` : ''
+                      }
+                    </Text>
+                  </TouchableOpacity>
+                );
+
+
+              })
+            }
+
+
           </BottomSheetScrollView>
         </BottomSheet>
 

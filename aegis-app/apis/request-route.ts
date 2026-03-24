@@ -6,14 +6,14 @@ export type SafetyRoute = {
     safetyScore: number
     duration: number,
     distance: number,
-    UUID: number
+    token: string
 }
 
-export async function fetchRoutes(source: LatLng, destination: LatLng): Promise<SafetyRoute[]> {
+export async function fetchRoutes(source: LatLng, destination: LatLng, token: string): Promise<SafetyRoute[]> {
     const res = await fetch(ROUTE_ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source, destination }),
+        body: JSON.stringify({ token, source, destination }),
     })
     if (!res.ok) {
         const text = await res.text();

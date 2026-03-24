@@ -16,10 +16,12 @@ import { fetchRoutes } from "@/apis/request-route";
 import { LatLng } from "react-native-maps";
 import { useSafetyRoutes } from "@/contexts/RoutingContext"
 import * as Location from "expo-location"
+import { useAuth } from "@/contexts/AuthContext";
 
-const selectRoute = async (destination: LatLng) => {
-  let {status} = await Location.requestForegroundPermissionsAsync()
-  if(status != 'granted') throw Error("Permission Denied.")
+const selectRoute = async (destination: LatLng, token: string | null) => {
+  let { status } = await Location.requestForegroundPermissionsAsync()
+  if (status != 'granted') throw Error("Permission Denied.")
+  if (!token) throw Error("Not logged in. How are you here?")
   // GetLocation.getCurrentPosition({
   //   enableHighAccuracy: true,
   //   timeout: 60000
@@ -30,16 +32,17 @@ const selectRoute = async (destination: LatLng) => {
   //   router.push("/select-route")
   // })
   Location.getLastKnownPositionAsync().then(async source => {
-    const routes = await fetchRoutes({latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0}, destination)
+    const routes = await fetchRoutes({ latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0 }, destination, token)
     const { setCandidateRoutes } = useSafetyRoutes();
     setCandidateRoutes(routes)
     router.push("/select-route")
   })
 };
 
-export default function ExploreScreen() {
+export default function SelectDestination() {
   const { highContrast, largeButtons, theme } = useAccessibility();
   const [destination, setDestination] = useState<Poi | null>(null);
+  const { token } = useAuth()
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
@@ -62,7 +65,7 @@ export default function ExploreScreen() {
             <Text
               style={[
                 styles.welcomeText,
-                { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing + 1, fontSize: (theme.dyslexicFontSize ?? 16) - 1},
+                { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing + 1, fontSize: (theme.dyslexicFontSize ?? 16) - 1 },
               ]}
             >
               Navigate safely. Travel confidently.
@@ -135,7 +138,7 @@ export default function ExploreScreen() {
           >
             Map Loading...
           </Text> */}
-          <BrumMap poiSelectCallback={setDestination}/>
+          <BrumMap poiSelectCallback={setDestination} />
         </View>
         {/* 
         <TouchableOpacity onPress={() => router.push("/arrived")}>
@@ -156,7 +159,7 @@ export default function ExploreScreen() {
             },
           ]}
           // onPress={() => router.push({ pathname: "/select-route"})}
-          onPress={async () => await selectRoute({latitude: destination?.poi_lat ?? 0, longitude: destination?.poi_lng ?? 0})}
+          onPress={async () => await selectRoute({ latitude: destination?.poi_lat ?? 0, longitude: destination?.poi_lng ?? 0}, token)}
           disabled={destination == null}
           accessibilityRole="button"
           accessibilityLabel="Start Journey"
@@ -172,7 +175,7 @@ export default function ExploreScreen() {
               },
             ]}
           >
-          {destination != null ? "Start Journey" : "Select Destination"}
+            {destination != null ? "Start Journey" : "Select Destination"}
           </Text>
         </TouchableOpacity>
       </View>

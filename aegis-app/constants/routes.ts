@@ -175,7 +175,7 @@ const InternalRoute1: SafetyRoute = {
     safetyScore: 53,
     duration: 58,
     distance: 4700,
-    UUID: -1
+    token: '-1'
 }
 const InternalRoute2: SafetyRoute = {
     coordinateArray: [
@@ -367,7 +367,7 @@ const InternalRoute2: SafetyRoute = {
     safetyScore: 74,
     duration: 61,
     distance: 4900,
-    UUID: -2
+    token: '-2'
 }
 //I never said this would be a good iea
 const InternalRoute3: SafetyRoute = {
@@ -533,6 +533,6 @@ const InternalRoute3: SafetyRoute = {
     safetyScore: 64,
     duration: 62,
     distance: 5000,
-    UUID: 0
+    token: '-3'
 }
 export const InternalRoutes = [InternalRoute1, InternalRoute2, InternalRoute3]

@@ -11,8 +11,9 @@ services:
   mts:
     image: "maptiler/tileserver-gl"
     volumes:
-      - ./data:/data
-      - ./style:/styles/omt
+      # - ./data:/data
+      # - ./style:/styles/omt
+      - ./tileserver-gl:/data
   cfd:
     image: cloudflare/cloudflared:latest
     environment:

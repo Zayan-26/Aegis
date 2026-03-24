@@ -1,0 +1,40 @@
+<script>
+    const AUTH_ENDPOINT = "https://stanton-swampless-diana.ngrok-free.dev"
+    async function create(fullName, email, password){
+        const res = await fetch(`${AUTH_ENDPOINT}/api/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                fullName,
+                email,
+                password
+            })
+        })
+        if (!res.ok) {
+            const text = await res.text()
+            console.log(` Failed: ${res.status} ${text}`)
+        }
+    }
+    async function login(email, password){
+        const res = await fetch(`${AUTH_ENDPOINT}/api/auth/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                email,
+                password
+            })
+        })
+        if (!res.ok) {
+            const text = await res.text()
+            console.log(`Login Failed: ${res.status} ${text}`)
+        }
+        else {
+            const { token, email, fullName } = await res.json()
+            console.log(`Got Credentials: Token = ${token}; Email = ${email}; FullName = ${fullName}`)
+            // await SecureStore.setItemAsync("token", token)
+            // await SecureStore.setItemAsync("email", email)
+            // await SecureStore.setItemAsync("fullName", fullName)
+            // return fullName
+        }
+    }
+</script>
