@@ -26,7 +26,7 @@ public class RoutingService {
         hopper.setGraphHopperLocation("target/routing-graph-cache");
         
         // specifying that we are using foot data, Aegis is a walking app
-        hopper.setEncodedValuesString("foot_access, foot_average_speed, foot_priority");
+        hopper.setEncodedValuesString("foot_access, foot_average_speed, foot_priority, hike_rating");
         
         // using JSON profile for walking 
         hopper.setProfiles(new Profile("foot").setCustomModel(GHUtility.loadCustomModelFromJar("foot.json")));
