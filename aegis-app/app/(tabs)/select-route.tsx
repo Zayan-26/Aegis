@@ -1,15 +1,13 @@
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { router, useLocalSearchParams } from "expo-router";
-import { useMemo, useRef, useState } from "react";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
-import { SafeAreaView } from 'react-native-safe-area-context'
 import BackBtn from "@/components/back-button";
 import MapView, { Polyline, UrlTile } from "react-native-maps";
 import { TILE_URL } from "@/apis/endpoints";
@@ -30,237 +28,6 @@ const RouteConstants = {
     bgColor: "#FFF5F5",
     textColor: "#C0392B",
   }
-}
-
-const ROUTES = [
-  {
-    id: "safest",
-    label: "Safest Route",
-    score: 92,
-    time: "24 min",
-    description: "Well-lit streets, busy pedestrian area",
-    borderColor: "#2D7D6F",
-    bgColor: "#F0FAF8",
-    textColor: "#2D7D6F",
-  },
-  {
-    id: "fastest",
-    label: "Fastest Route",
-    score: null,
-    time: "17 min",
-    description: "Lower lighting in some sections",
-    borderColor: "#E5A0A0",
-    bgColor: "#FFF5F5",
-    textColor: "#C0392B",
-  },
-];
-
-function OldJourneyScreen() {
-  const { destination } = useLocalSearchParams<{ destination: string }>();
-  const { highContrast, largeButtons, theme } = useAccessibility();
-  const [selectedRoute, setSelectedRoute] = useState("safest");
-
-  const snapPoints = useMemo(() => ["15%", "45%", "85%"], []);
-  const bottomSheetRef = useRef<BottomSheet>(null);
-
-  return (
-    // <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.screenBackground }}>
-    <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
-      <StatusBar
-        barStyle={highContrast ? "light-content" : "dark-content"}
-        backgroundColor={theme.screenBackground}
-      />
-
-      {/* Map */}
-      <View
-        style={[
-          styles.mapBox,
-          { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor },
-        ]}
-      >
-        <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
-          <Text style={[styles.closeBtnText, { color: theme.mainTextColor }]}>✕</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={{ position: "absolute", top: 14, right: 14 }}
-          onPress={() => router.push("/profile")}
-        >
-          <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
-        </TouchableOpacity>
-
-        <Text style={styles.mapEmoji}>🗺️</Text>
-        <Text
-          style={[
-            styles.mapTitle,
-            { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
-          ]}
-        >
-          Map...
-        </Text>
-        <Text
-          style={[
-            styles.mapSubtitle,
-            {
-              color: theme.smallTextColor,
-              fontFamily: theme.font,
-              letterSpacing: theme.letterSpacing,
-              lineHeight: theme.lineH,
-            },
-          ]}
-        >
-          Live navigation will appear here
-        </Text>
-      </View>
-
-      {/* Bottom sheet */}
-      <BottomSheet
-        ref={bottomSheetRef}
-        index={1}
-        snapPoints={snapPoints}
-        backgroundStyle={[styles.sheetBg, { backgroundColor: theme.boxBackground }]}
-        handleIndicatorStyle={{
-          backgroundColor: theme.boxBorderColor,
-          width: 40,
-          height: 4,
-        }}
-      >
-        <BottomSheetScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
-          {/* Destination row */}
-          <View style={[styles.destinationRow, { borderBottomColor: theme.boxBorderColor }]}>
-            <Text style={{ fontSize: 16 }}>🔍</Text>
-            <Text style={{ color: theme.smallTextColor, fontSize: 11 }}>Heading to</Text>
-            <Text
-              style={[
-                styles.destinationText,
-                {
-                  color: theme.mainTextColor,
-                  fontFamily: theme.font,
-                  fontSize: theme.labelSize,
-                  letterSpacing: theme.letterSpacing,
-                },
-              ]}
-            >
-              {destination}
-            </Text>
-          </View>
-
-          {/* Route cards */}
-          {ROUTES.map((route) => {
-            const isSelected = selectedRoute === route.id;
-            const routeBg = highContrast
-              ? isSelected
-                ? "#333333"
-                : "#1A1A1A"
-              : route.bgColor;
-            const routeBorder = highContrast
-              ? isSelected
-                ? "#FFFFFF"
-                : "#444444"
-              : route.borderColor;
-            const routeTextColor = highContrast ? "#FFFFFF" : route.textColor;
-            const routeDescColor = highContrast ? "#CCCCCC" : "#4F647A";
-
-            return (
-              <TouchableOpacity
-                key={route.id}
-                style={[
-                  styles.routeCard,
-                  {
-                    backgroundColor: routeBg,
-                    borderColor: routeBorder,
-                    borderWidth: isSelected ? 2 : 1,
-                    padding: largeButtons ? 16 : 12,
-                  },
-                ]}
-                onPress={() => {
-                  setSelectedRoute(route.id);
-                  router.push({
-                    pathname: "/route-detail",
-                    params: { routeId: route.id, destination },
-                  });
-                }}
-                accessibilityRole="button"
-                accessibilityLabel={route.label}
-              >
-                <View style={styles.routeLeft}>
-                  <View style={styles.routeInfo}>
-                    <Text
-                      style={[
-                        styles.routeLabel,
-                        {
-                          color: routeTextColor,
-                          fontFamily: theme.font,
-                          fontSize: theme.labelSize,
-                          letterSpacing: theme.letterSpacing,
-                        },
-                      ]}
-                    >
-                      {route.label}
-                    </Text>
-                    {route.score && (
-                      <Text
-                        style={[
-                          styles.routeScore,
-                          { color: routeTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
-                        ]}
-                      >
-                        Safety score: {route.score}
-                      </Text>
-                    )}
-                    <Text
-                      style={[
-                        styles.routeDesc,
-                        {
-                          color: routeDescColor,
-                          fontFamily: theme.font,
-                          letterSpacing: theme.letterSpacing,
-                          lineHeight: theme.lineH,
-                        },
-                      ]}
-                    >
-                      {route.description}
-                    </Text>
-                  </View>
-                </View>
-                <Text
-                  style={[
-                    styles.routeTime,
-                    {
-                      color: routeTextColor,
-                      fontFamily: theme.font,
-                      fontSize: theme.labelSize + 2,
-                      letterSpacing: theme.letterSpacing,
-                    },
-                  ]}
-                >
-                  {route.time}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </BottomSheetScrollView>
-      </BottomSheet>
-    </SafeAreaView>
-    // </GestureHandlerRootView>
-  );
-}
-function safetyColor(score: number): string {
-  const bounded = Math.max(0, Math.min(score, 100));
-  let r, g, b;
-
-  if (bounded < 50) {
-    const percent = bounded / 50;
-    r = 255;
-    g = Math.round(59 + (213 - 59) * percent);
-    b = Math.round(48 + (0 - 48) * percent);
-  } else {
-    const percent = (bounded - 50) / 50;
-    r = Math.round(255 + (52 - 255) * percent);
-    g = Math.round(213 + (199 - 213) * percent);
-    b = Math.round(0 + (89 - 0) * percent);
-  }
-  return `rgb(${r},${g},${b})`;
 }
 
 function RouteSelection() {
@@ -326,7 +93,7 @@ function RouteSelection() {
           region={region}
         >
           <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
-          {[safest, fastest].map(({theme, route}, _) => (
+          {[safest, fastest].map(({ theme, route }, _) => (
             <Polyline
               key={route.token}
               coordinates={route.coordinateArray}
@@ -346,7 +113,6 @@ function RouteSelection() {
           }}
         >
           <BottomSheetScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
-            {/* Destination row */}
             <View style={[styles.destinationRow, { borderBottomColor: theme.boxBorderColor }]}>
               <Text style={{ fontSize: 16 }}>🔍</Text>
               <Text style={{ color: theme.smallTextColor, fontSize: 11 }}>Heading to</Text>
@@ -365,7 +131,7 @@ function RouteSelection() {
               </Text>
             </View>
             {
-              [safest, fastest].map(({theme: routeTheme, route}, _) => {
+              [safest, fastest].map(({ theme: routeTheme, route }, _) => {
                 const isSelected = selectedRoute.token === route.token
                 const routeBg = highContrast
                   ? isSelected
@@ -388,7 +154,7 @@ function RouteSelection() {
                         backgroundColor: routeBg,
                         borderColor: routeBorder,
                         borderWidth: isSelected ? 2 : 1,
-                        padding:theme.btnRadius - 4
+                        padding: theme.btnRadius - 4
                       },
                     ]}
                     onPress={() => {
@@ -440,25 +206,19 @@ function RouteSelection() {
                       ]}
                     >
                       {
-                        ~~(route.duration / 60) > 0 ?  ` ${~~(route.duration / 60)} Hr `  : '' 
+                        ~~(route.duration / 60) > 0 ? ` ${~~(route.duration / 60)} Hr ` : ''
                       }
                       {
-                          route.duration % 60 > 0 ? `${route.duration % 60} Mins` : ''
+                        route.duration % 60 > 0 ? `${route.duration % 60} Mins` : ''
                       }
                     </Text>
                   </TouchableOpacity>
                 );
-
-
               })
             }
-
-
           </BottomSheetScrollView>
         </BottomSheet>
-
       </View>
-
     </View>
   )
 }
@@ -466,33 +226,6 @@ function RouteSelection() {
 export default RouteSelection
 
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
-  // mapBox: {
-  //   flex: 1,
-  //   margin: 16,
-  //   marginBottom: 0,
-  //   borderRadius: 20,
-  //   borderWidth: 1,
-  //   alignItems: "center",
-  //   justifyContent: "center",
-  //   gap: 8,
-  //   padding: 24,
-  // },
-  mapEmoji: { fontSize: 48 },
-  mapTitle: { fontSize: 16, fontWeight: "700" },
-  mapSubtitle: { fontSize: 12, textAlign: "center" },
-  closeBtn: {
-    position: "absolute",
-    top: 14,
-    left: 14,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#00000015",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  closeBtnText: { fontSize: 16, fontWeight: "700" },
   sheetBg: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
