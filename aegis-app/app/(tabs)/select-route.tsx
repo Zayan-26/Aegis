@@ -1,6 +1,6 @@
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { router } from "expo-router";
-import { useState } from "react";
+import { router, useNavigation } from "expo-router";
+import { Dispatch, SetStateAction, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -14,6 +14,7 @@ import { TILE_URL } from "@/apis/endpoints";
 import { useSafetyRoutes } from "@/contexts/RoutingContext";
 import { InternalRoutes } from "@/constants/routes";
 import { SafetyRoute } from "@/apis/request-route";
+import { NavNode } from "@/apis/request-navigation";
 
 const RouteConstants = {
   safest: {
@@ -29,12 +30,13 @@ const RouteConstants = {
     textColor: "#C0392B",
   }
 }
+async function routeBtn(setRoute: Dispatch<SetStateAction<SafetyRoute[]>>, setNav: Dispatch<SetStateAction<NavNode[]>> ) {
 
+}
 function RouteSelection() {
   const { theme, highContrast } = useAccessibility();
-  const { destination } = useSafetyRoutes()
+  const { destination, setCandidateRoutes, setNavigation } = useSafetyRoutes()
   //Internal Routes are placeholders, just uncomment the next line and comment the next one out / delete the next one.
-  // const { candidateRoutes } = useSafetyRoutes();
   const candidateRoutes = InternalRoutes
   type ThemeRoutePair = {
     theme: {
@@ -55,8 +57,6 @@ function RouteSelection() {
     route: candidateRoutes.sort((a, b) => b.duration - a.duration)[0],
   }
 
-  const [selectedRoute, setSelectedRoute] = useState(safest.route)
-
   const allCoords = candidateRoutes.flatMap(route => route.coordinateArray);
 
   const lats = allCoords.map(c => c.latitude);
@@ -67,14 +67,11 @@ function RouteSelection() {
   const minLng = Math.min(...lngs);
   const maxLng = Math.max(...lngs);
 
-  const latPadding = 0.01;
-  const lngPadding = 0.01;
-
   const region = {
     latitude: (minLat + maxLat) / 2,
     longitude: (minLng + maxLng) / 2,
-    latitudeDelta: (maxLat - minLat) + latPadding,
-    longitudeDelta: (maxLng - minLng) + lngPadding,
+    latitudeDelta: (maxLat - minLat) + 0.01,
+    longitudeDelta: (maxLng - minLng) + 0.01,
   };
   return (
     <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
@@ -132,19 +129,13 @@ function RouteSelection() {
             </View>
             {
               [safest, fastest].map(({ theme: routeTheme, route }, _) => {
-                const isSelected = selectedRoute.token === route.token
                 const routeBg = highContrast
-                  ? isSelected
-                    ? "#333333"
-                    : "#1A1A1A"
+                  ? "#1A1A1A"
                   : routeTheme.bgColor;
                 const routeBorder = highContrast
-                  ? isSelected
-                    ? "#FFFFFF"
-                    : "#444444"
+                  ? "#444444"
                   : routeTheme.borderColor;
                 const routeTextColor = highContrast ? "#FFFFFF" : routeTheme.textColor;
-                const routeDescColor = highContrast ? "#CCCCCC" : "#4F647A";
                 return (
                   <TouchableOpacity
                     key={route.token}
@@ -153,17 +144,11 @@ function RouteSelection() {
                       {
                         backgroundColor: routeBg,
                         borderColor: routeBorder,
-                        borderWidth: isSelected ? 2 : 1,
+                        borderWidth: 2,
                         padding: theme.btnRadius - 4
                       },
                     ]}
-                    onPress={() => {
-                      setSelectedRoute(route);
-                      router.push({
-                        pathname: "/route-detail",
-                        params: { routeId: route.token, destination },
-                      });
-                    }}
+                    onPress={async () => await routeBtn(setCandidateRoutes, setNavigation)}
                     accessibilityRole="button"
                     accessibilityLabel={routeTheme.label}
                   >
