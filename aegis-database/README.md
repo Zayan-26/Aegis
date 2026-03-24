@@ -10,21 +10,21 @@ Executing the files in this exact order:
 1. Create tables:
     + schema/01_users.sql
     + schema/02_accessibility_prefs.sql
-    + schema/03_routes.sql
+    + schema/03_routing.sql
     + schema/04_companion_sessions.sql
     + schema/05_location_updates.sql
 
 2. Insert test data:
     + data/01_users_data.sql
     + data/02_accessibility_data.sql
-    + data/03_routes_data.sql
+    + data/03_routing_data.sql
     + data/04_companion_sessions_data.sql
     + data/05_location_updates_data.sql
 
 3. Run tests to verify:
     + tests/01_user_tests.sql
     + tests/02_accessibility_tests.sql
-    + tests/03_route_tests.sql
+    + tests/03_routing_tests.sql
     + tests/04_companion_tests.sql
     + tests/05_location_tests.sql
 
