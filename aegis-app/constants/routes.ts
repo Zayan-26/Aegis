@@ -5,6 +5,8 @@ import { SafetyRoute } from "@/apis/request-route"
 
 //I guess I'll manually port it since gpxparser and related libraries seem to have shoddy compatibility.
 //Using an LLM because I'm not quite mentally insane yet.
+//Ok I don't know why I thought it would process the data properly
+//My one braincell is failing me
 //Safety scores and UUIDs are placeholders.
 const InternalRoute1: SafetyRoute = {
     coordinateArray: [
@@ -169,7 +171,6 @@ const InternalRoute1: SafetyRoute = {
         { latitude: 52.476892, longitude: -1.894391 },
         { latitude: 52.476924, longitude: -1.894464 },
         { latitude: 52.476992, longitude: -1.894509 },
-
     ],
     safetyScore: 53,
     duration: 58,
@@ -362,7 +363,6 @@ const InternalRoute2: SafetyRoute = {
         { latitude: 52.476892, longitude: -1.894391 },
         { latitude: 52.476924, longitude: -1.894464 },
         { latitude: 52.476992, longitude: -1.894509 },
-
     ],
     safetyScore: 74,
     duration: 61,
@@ -498,6 +498,37 @@ const InternalRoute3: SafetyRoute = {
         { latitude: 52.477552, longitude: -1.903123 },
         { latitude: 52.477574, longitude: -1.903055 },
         { latitude: 52.477706, longitude: -1.902642 },
+        { latitude: 52.477928, longitude: -1.901952 },
+        { latitude: 52.477966, longitude: -1.901838 },
+        { latitude: 52.478025, longitude: -1.901656 },
+        { latitude: 52.47835, longitude: -1.900672 },
+        { latitude: 52.478406, longitude: -1.900514 },
+        { latitude: 52.47845, longitude: -1.900557 },
+        { latitude: 52.478561, longitude: -1.900195 },
+        { latitude: 52.478635, longitude: -1.899983 },
+        { latitude: 52.478682, longitude: -1.899995 },
+        { latitude: 52.47872, longitude: -1.899989 },
+        { latitude: 52.47862, longitude: -1.898895 },
+        { latitude: 52.478584, longitude: -1.898574 },
+        { latitude: 52.478591, longitude: -1.898422 },
+        { latitude: 52.478606, longitude: -1.898372 },
+        { latitude: 52.478639, longitude: -1.898311 },
+        { latitude: 52.478671, longitude: -1.898307 },
+        { latitude: 52.478992, longitude: -1.898118 },
+        { latitude: 52.479072, longitude: -1.898071 },
+        { latitude: 52.479058, longitude: -1.897931 },
+        { latitude: 52.47903, longitude: -1.897747 },
+        { latitude: 52.478681, longitude: -1.89592 },
+        { latitude: 52.478535, longitude: -1.895083 },
+        { latitude: 52.478141, longitude: -1.894859 },
+        { latitude: 52.477614, longitude: -1.894134 },
+        { latitude: 52.477364, longitude: -1.894074 },
+        { latitude: 52.477353, longitude: -1.894168 },
+        { latitude: 52.477304, longitude: -1.894207 },
+        { latitude: 52.477178, longitude: -1.894463 },
+        { latitude: 52.477096, longitude: -1.894522 },
+        { latitude: 52.477041, longitude: -1.894524 },
+        { latitude: 52.476992, longitude: -1.894509 },
     ],
     safetyScore: 64,
     duration: 62,

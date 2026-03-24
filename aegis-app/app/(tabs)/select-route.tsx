@@ -11,7 +11,7 @@ import {
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackBtn from "@/components/back-button";
-import MapView, { UrlTile } from "react-native-maps";
+import MapView, { Polyline, UrlTile } from "react-native-maps";
 import { TILE_URL } from "@/apis/endpoints";
 import { useSafetyRoutes } from "@/contexts/RoutingContext";
 import { InternalRoutes } from "@/constants/routes";
@@ -229,11 +229,47 @@ function OldJourneyScreen() {
     // </GestureHandlerRootView>
   );
 }
+function safetyColor(score: number): string {
+  const bounded = Math.max(0, Math.min(score, 100));
+  let r, g, b;
+
+  if (bounded < 50) {
+    const percent = bounded / 50;
+    r = 255;
+    g = Math.round(59 + (213 - 59) * percent);
+    b = Math.round(48 + (0 - 48) * percent);
+  } else {
+    const percent = (bounded - 50) / 50;
+    r = Math.round(255 + (52 - 255) * percent);
+    g = Math.round(213 + (199 - 213) * percent);
+    b = Math.round(0 + (89 - 0) * percent);
+  }
+  return `rgb(${r},${g},${b})`;
+}
 
 function RouteSelection() {
   const { theme } = useAccessibility();
   // const { candidateRoutes } = useSafetyRoutes();
   const candidateRoutes = InternalRoutes
+  const allCoords = candidateRoutes.flatMap(route => route.coordinateArray);
+
+  const lats = allCoords.map(c => c.latitude);
+  const lngs = allCoords.map(c => c.longitude);
+
+  const minLat = Math.min(...lats);
+  const maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs);
+  const maxLng = Math.max(...lngs);
+
+  const latPadding = 0.01; // tweak these values as needed
+  const lngPadding = 0.01;
+
+  const region = {
+    latitude: (minLat + maxLat) / 2,
+    longitude: (minLng + maxLng) / 2,
+    latitudeDelta: (maxLat - minLat) + latPadding,
+    longitudeDelta: (maxLng - minLng) + lngPadding,
+  };
   return (
     <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
       {/* <StatusBar backgroundColor={theme.screenBackground} /> */}
@@ -248,9 +284,18 @@ function RouteSelection() {
           // showsPointsOfInterest={false}
           // pitchEnabled={false}
           // scrollEnabled={false}
-          region={{ longitude: candidateRoutes[0].coordinateArray[0].longitude, latitude: candidateRoutes[0].coordinateArray[0].latitude, longitudeDelta: 0.01, latitudeDelta: 0.01}}
+          region={region}
         >
-        <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
+          <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
+          {/* <Polyline coordinates={InternalRoutes[0].coordinateArray}></Polyline> */}
+          {candidateRoutes.map(route => (
+            <Polyline
+              key={route.UUID}
+              coordinates={route.coordinateArray}
+              strokeWidth={4}
+              strokeColor={safetyColor(route.safetyScore)}
+            />
+          ))}
         </MapView>
       </View>
 

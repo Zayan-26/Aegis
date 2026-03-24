@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Toast } from "toastify-react-native";
+import * as SecureStore from "expo-secure-store"
 
 async function loginBtn(email: string, passwd: string, clearInput: () => void) {
     if (email.length <= 0 || passwd.length <= 0) Toast.error("Input cannot be empty.")
@@ -17,6 +18,12 @@ async function loginBtn(email: string, passwd: string, clearInput: () => void) {
             router.replace('/accessibility')
         }
     }
+}
+async function skipBtn() {
+    await SecureStore.setItemAsync("token", "placeholder")
+    await SecureStore.setItemAsync("email", "lorem ipsum")
+    await SecureStore.setItemAsync("fullName", "今次好大鑊呢")
+    router.replace('/accessibility')
 }
 
 export default function LoginScreen() {
@@ -62,8 +69,8 @@ export default function LoginScreen() {
             <Text style={styles.backText}>Back</Text>
             </TouchableOpacity> */}
             </View>
-            <TouchableOpacity style={{marginTop: 'auto', marginBottom: 100}}>
-                <Text style={[styles.linkHighlight, {textAlign: "center"}]}>
+            <TouchableOpacity onPress={skipBtn} style={{ marginTop: 'auto', marginBottom: 100 }}>
+                <Text style={[styles.linkHighlight, { textAlign: "center" }]}>
                     Skip Login (Test)
                 </Text>
             </TouchableOpacity>

@@ -6,7 +6,7 @@ type AuthContextValue = {
     setToken: Dispatch<SetStateAction<string | null>>
     displayName: string | null,
     setDisplayName: Dispatch<SetStateAction<string | null>>
-    loggedIn: boolean
+    loggedIn: () => boolean
 }
 
 const AuthContext = createContext<AuthContextValue | undefined> (undefined)
@@ -22,7 +22,7 @@ export function AuthProvider({children}: {children: ReactNode}){
     }, [])
 
     return (
-        <AuthContext.Provider value={{token, setToken, displayName, setDisplayName, loggedIn: !!(token && displayName)}}>
+        <AuthContext.Provider value={{token, setToken, displayName, setDisplayName, loggedIn: () => token !== null && displayName !== null}}>
             {children}    
         </AuthContext.Provider>
     )
