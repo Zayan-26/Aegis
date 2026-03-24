@@ -5,6 +5,7 @@ import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { fetchNearbyPois, Poi, poiLabel } from "@/apis/request-poi";
 import { TILE_URL } from "@/apis/endpoints";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { RoutingProvider, useSafetyRoutes } from "@/contexts/RoutingContext";
 
 type DestinationMarker = {
   id: number;
@@ -26,11 +27,11 @@ type BrumMapProps = {
 export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
   const { theme, highContrast } = useAccessibility();
   const mapRef = useRef<MapView | null>(null);
-
+  const {setDestination} = useSafetyRoutes()
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["20%", "45%"], []);
 
-  const [destination, setDestination] = useState<DestinationMarker | null>(null);
+  const [destinationM, setDestinationM] = useState<DestinationMarker | null>(null);
 
   const [pois, setPois] = useState<Poi[]>([]);
   const [poisLoading, setPoisLoading] = useState(false);
@@ -50,7 +51,7 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
   const onLongPress = useCallback(async (e: LongPressEvent) => {
     const latlng = e.nativeEvent.coordinate;
 
-    setDestination({ id: 0, latlng, title: "Destination" });
+    setDestinationM({ id: 0, latlng, title: "Destination" });
 
     setPois([]);
     setSelectedPoiId("");
@@ -72,13 +73,13 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
     setSelectedPoiId("");
     setPoisError("");
     setPoisLoading(false);
-    setDestination(null);
+    setDestinationM(null);
     closeSheet();
     poiSelectCallback(null)
   }, [closeSheet]);
 
   useEffect(() => {
-    if (!destination) return;
+    if (!destinationM) return;
     if (poisLoading) return;
     if (poisError) {
       openSheet();
@@ -87,12 +88,13 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
     if (pois.length > 0) {
       openSheet();
     }
-  }, [destination, poisLoading, poisError, pois, openSheet]);
+  }, [destinationM, poisLoading, poisError, pois, openSheet]);
 
   const selectPoi = useCallback(
     (poi: Poi) => {
       const poiId = String(poi.osm_id);
       setSelectedPoiId(poiId);
+      setDestination(poi.name ?? undefined)
 
       if (mapRef.current) {
         mapRef.current.animateToRegion(
@@ -127,8 +129,8 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
       >
         <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
 
-        {destination && !selectedPoi && (
-          <Marker coordinate={destination.latlng} title={destination.title} pinColor="red" stopPropagation />
+        {destinationM && !selectedPoi && (
+          <Marker coordinate={destinationM.latlng} title={destinationM.title} pinColor="red" stopPropagation />
         )}
 
         {selectedPoi && (
@@ -141,7 +143,7 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
         )}
       </MapView>
 
-      {destination && (
+      {destinationM && (
         <BottomSheet
           ref={sheetRef}
           index={-1}

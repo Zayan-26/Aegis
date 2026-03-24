@@ -12,15 +12,18 @@ import type { SafetyRoute } from "@/apis/request-route";
 type RoutingContextValue = {
     candidateRoutes: SafetyRoute[]
     setCandidateRoutes: Dispatch<SetStateAction<SafetyRoute[]>>
+    destination?: string
+    setDestination: Dispatch<SetStateAction<string | undefined>>
 }
 
 const RoutingContext = createContext<RoutingContextValue | undefined>(undefined);
 
 export function RoutingProvider({ children }: { children: ReactNode }) {
     const [candidateRoutes, setCandidateRoutes] = useState<SafetyRoute[]>([])
+    const [destination, setDestination] = useState<string | undefined>(undefined)
     const resetRoutes = () => setCandidateRoutes([])
     const value = useMemo<RoutingContextValue>(
-        () => ({ candidateRoutes, setCandidateRoutes }), [candidateRoutes],
+        () => ({ candidateRoutes, setCandidateRoutes, destination, setDestination}), [candidateRoutes],
     )
     return <RoutingContext.Provider value={value}>{children}</RoutingContext.Provider>
 }

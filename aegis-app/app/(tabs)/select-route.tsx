@@ -249,6 +249,7 @@ function safetyColor(score: number): string {
 
 function RouteSelection() {
   const { theme } = useAccessibility();
+  const { destination } = useSafetyRoutes()
   // const { candidateRoutes } = useSafetyRoutes();
   const candidateRoutes = InternalRoutes
   const allCoords = candidateRoutes.flatMap(route => route.coordinateArray);
@@ -287,7 +288,6 @@ function RouteSelection() {
           region={region}
         >
           <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
-          {/* <Polyline coordinates={InternalRoutes[0].coordinateArray}></Polyline> */}
           {candidateRoutes.map(route => (
             <Polyline
               key={route.UUID}
@@ -297,6 +297,131 @@ function RouteSelection() {
             />
           ))}
         </MapView>
+        <BottomSheet
+          index={1}
+          snapPoints={["40%", "70%"]}
+          backgroundStyle={[styles.sheetBg, { backgroundColor: theme.boxBackground }]}
+          handleIndicatorStyle={{
+            backgroundColor: theme.boxBorderColor,
+            width: 40,
+            height: 4,
+          }}
+        >
+          <BottomSheetScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
+            {/* Destination row */}
+            <View style={[styles.destinationRow, { borderBottomColor: theme.boxBorderColor }]}>
+              <Text style={{ fontSize: 16 }}>🔍</Text>
+              <Text style={{ color: theme.smallTextColor, fontSize: 11 }}>Heading to</Text>
+              <Text
+                style={[
+                  styles.destinationText,
+                  {
+                    color: theme.mainTextColor,
+                    fontFamily: theme.font,
+                    fontSize: theme.labelSize,
+                    letterSpacing: theme.letterSpacing,
+                  },
+                ]}
+              >
+                {destination}
+              </Text>
+            </View>
+            {ROUTES.map((route) => {
+              const isSelected = selectedRoute === route.id;
+              const routeBg = highContrast
+                ? isSelected
+                  ? "#333333"
+                  : "#1A1A1A"
+                : route.bgColor;
+              const routeBorder = highContrast
+                ? isSelected
+                  ? "#FFFFFF"
+                  : "#444444"
+                : route.borderColor;
+              const routeTextColor = highContrast ? "#FFFFFF" : route.textColor;
+              const routeDescColor = highContrast ? "#CCCCCC" : "#4F647A";
+
+              return (
+                <TouchableOpacity
+                  key={route.id}
+                  style={[
+                    styles.routeCard,
+                    {
+                      backgroundColor: routeBg,
+                      borderColor: routeBorder,
+                      borderWidth: isSelected ? 2 : 1,
+                      padding: largeButtons ? 16 : 12,
+                    },
+                  ]}
+                  onPress={() => {
+                    setSelectedRoute(route.id);
+                    router.push({
+                      pathname: "/route-detail",
+                      params: { routeId: route.id, destination },
+                    });
+                  }}
+                  accessibilityRole="button"
+                  accessibilityLabel={route.label}
+                >
+                  <View style={styles.routeLeft}>
+                    <View style={styles.routeInfo}>
+                      <Text
+                        style={[
+                          styles.routeLabel,
+                          {
+                            color: routeTextColor,
+                            fontFamily: theme.font,
+                            fontSize: theme.labelSize,
+                            letterSpacing: theme.letterSpacing,
+                          },
+                        ]}
+                      >
+                        {route.label}
+                      </Text>
+                      {route.score && (
+                        <Text
+                          style={[
+                            styles.routeScore,
+                            { color: routeTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+                          ]}
+                        >
+                          Safety score: {route.score}
+                        </Text>
+                      )}
+                      <Text
+                        style={[
+                          styles.routeDesc,
+                          {
+                            color: routeDescColor,
+                            fontFamily: theme.font,
+                            letterSpacing: theme.letterSpacing,
+                            lineHeight: theme.lineH,
+                          },
+                        ]}
+                      >
+                        {route.description}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text
+                    style={[
+                      styles.routeTime,
+                      {
+                        color: routeTextColor,
+                        fontFamily: theme.font,
+                        fontSize: theme.labelSize + 2,
+                        letterSpacing: theme.letterSpacing,
+                      },
+                    ]}
+                  >
+                    {route.time}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </BottomSheetScrollView>
+        </BottomSheet>
+
       </View>
 
     </View>
