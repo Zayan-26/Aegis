@@ -1,4 +1,6 @@
--- testing Query 1: First time insertion as NoRouteUser has no preference yet.
+USE aegis;
+
+-- Testing Query 1: First time insertion as NoRouteUser has no preference yet.
 INSERT INTO accessibility_prefs(pref_id, user_id, dyslexia_support, colour_blind_friendly, high_contrast, large_touch_buttons)
 VALUES (UUID(),'a1b2c3d4-0005-0005-0005-000000000005', TRUE, FALSE, TRUE, FALSE) AS new_inserted_record
 ON DUPLICATE KEY UPDATE
@@ -11,7 +13,7 @@ ON DUPLICATE KEY UPDATE
 SELECT * FROM accessibility_prefs
 WHERE user_id = 'a1b2c3d4-0005-0005-0005-000000000005';
 
--- testing Query 1: First time insert, Mahima already has prefs - this should UPDATE not INSERT
+-- Testing Query 1: First time insert, Mahima already has prefs - this should UPDATE not INSERT
 INSERT INTO accessibility_prefs (pref_id, user_id, dyslexia_support, colour_blind_friendly, high_contrast, large_touch_buttons)
 VALUES (UUID(), 'a1b2c3d4-0001-0001-0001-000000000001', FALSE, TRUE, TRUE, TRUE) as new_updated_record
 ON DUPLICATE KEY UPDATE 
@@ -24,7 +26,7 @@ ON DUPLICATE KEY UPDATE
 SELECT * FROM accessibility_prefs
 WHERE user_id = 'a1b2c3d4-0001-0001-0001-000000000001';
 
--- Testing query 2 - GET preferences
+-- Testing Query 2 - GET preferences
 SELECT dyslexia_support, colour_blind_friendly, high_constrast, large_touch_buttons
 FROM accessibility_prefs
 WHERE user_id = 'a1b2c3d4-0001-0001-0001-000000000001';

@@ -1,4 +1,5 @@
 USE aegis;
+
 -- Query 1: Save or update preferences. When user completes setup or changes any toggel then it automatically inserts if first time, updates if already exists. 
 INSERT INTO accessibility_prefs(pref_id, user_id, dyslexia_support, colour_blind_friendly, high_contrast, large_touch_buttons)
 VALUES (UUID(), ?, ?, ?, ?, ?) as new_updated_record -- (or new_inserted_record)
