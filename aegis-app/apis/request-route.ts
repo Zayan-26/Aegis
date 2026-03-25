@@ -1,5 +1,5 @@
 import { LatLng } from "react-native-maps"
-import { ROUTE_ENDPOINT } from "./endpoints"
+import { ROUTE_ENDPOINT } from "../constants/endpoints"
 
 export type SafetyRoute = {
     coordinateArray: LatLng[],

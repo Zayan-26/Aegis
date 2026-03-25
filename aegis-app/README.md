@@ -24,4 +24,7 @@ In the output, you'll find options to open the app in a
 ## Development Notes
 
 ### API Endpoints
-API Endpoints are store in ./app/apis/endpoints.ts.
+API Endpoints are store in ./constants/endpoints.ts. Check the message formats in ./apis/ and change the endpoints accordingly.
+
+### Map Rendering
+If you want the application to work, a map tile server + POI server will at least need to be provided. The one running on my computer will not be on after this project concludes, check ../aegis-map/README.md for information on how to recreate the data needed. (Hoping it works)

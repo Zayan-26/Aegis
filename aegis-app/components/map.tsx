@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 import MapView, { LatLng, LongPressEvent, MapPressEvent, Marker, Region, UrlTile } from "react-native-maps";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { fetchNearbyPois, Poi, poiLabel } from "@/apis/request-poi";
-import { BASE_TILE_URL, DARK_TILE_URL } from "@/apis/endpoints";
+import { BASE_TILE_URL, DARK_TILE_URL } from "@/constants/endpoints";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { RoutingProvider, useAegisRouting } from "@/contexts/RoutingContext";
 

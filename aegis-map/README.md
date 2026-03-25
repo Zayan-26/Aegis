@@ -10,6 +10,7 @@ Docker compose is used becuase it trivialises the networking, there are also doc
 
 ### OSM.PBF
 Original osm.pbf downloaded from https://download.geofabrik.de/europe/united-kingdom.html .<br>
+Put the original `osm.pbf` for the region you're using into the source directory in order for the scripts to function. <br>
 Extracted using https://github.com/openmaptiles/openmaptiles-tools/ via `./scripts/create_osmpbf.sh`.
 
 ### Map Tiles

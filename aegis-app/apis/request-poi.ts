@@ -1,5 +1,5 @@
 import { LatLng } from "react-native-maps";
-import { POI_ENDPOINT } from "./endpoints";
+import { POI_ENDPOINT } from "../constants/endpoints";
 
 export type Poi = {
   osm_id: number;

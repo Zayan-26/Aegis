@@ -1,5 +1,5 @@
 import { LatLng } from "react-native-maps"
-import { NAV_URL } from "./endpoints";
+import { NAV_URL } from "../constants/endpoints";
 
 export type NavNode = {
     coordinates: LatLng,

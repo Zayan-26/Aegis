@@ -1,4 +1,4 @@
-import { AUTH_ENDPOINT } from "./endpoints";
+import { AUTH_ENDPOINT } from "../constants/endpoints";
 // import { setItemAsync } from "expo-secure-store";
 import * as SecureStore from "expo-secure-store"
 

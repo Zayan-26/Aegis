@@ -9,7 +9,7 @@ import {
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import BackBtn from "@/components/back-button";
 import MapView, { Polyline, UrlTile } from "react-native-maps";
-import { BASE_TILE_URL, DARK_TILE_URL } from "@/apis/endpoints";
+import { BASE_TILE_URL, DARK_TILE_URL } from "@/constants/endpoints";
 import { region, useAegisRouting } from "@/contexts/RoutingContext";
 import { InternalRoutes } from "@/constants/routes";
 import { SafetyRoute } from "@/apis/request-route";

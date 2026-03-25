@@ -1,5 +1,5 @@
 import { LatLng } from "react-native-maps";
-import { TRIP_ENDPOINT } from "./endpoints";
+import { TRIP_ENDPOINT } from "../constants/endpoints";
 
 export function createSocket() : WebSocket{
     return new WebSocket(TRIP_ENDPOINT)

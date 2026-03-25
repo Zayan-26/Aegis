@@ -1,4 +1,4 @@
-import { BASE_TILE_URL, DARK_TILE_URL } from "@/apis/endpoints"
+import { BASE_TILE_URL, DARK_TILE_URL } from "@/constants/endpoints"
 import { fetchNavigation } from "@/apis/request-navigation"
 import BackBtn from "@/components/back-button"
 import { InternalRoutes } from "@/constants/routes"
