@@ -4,7 +4,6 @@ import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import {
-  // SafeAreaView,
   StatusBar,
   StyleSheet,
   Switch,

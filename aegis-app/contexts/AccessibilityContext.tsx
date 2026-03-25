@@ -1,4 +1,5 @@
-import { createContext, ReactNode, useContext, useMemo, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useMemo, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage"
 interface TrustedContact {
   id: string;
   name: string;
@@ -19,7 +20,7 @@ interface AccessibilityContextType {
   setNotifyOn: (val: boolean) => void;
   trustedContacts: TrustedContact[];
   setTrustedContacts: (contacts: TrustedContact[]) => void;
-  
+
   theme: AccessibilityTheme;
 }
 
@@ -48,16 +49,41 @@ export type AccessibilityTheme = {
   cardPadding: number;
 };
 
-
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(undefined);
 
 export function AccessibilityProvider({ children }: { children: ReactNode }) {
-  const [dyslexic, setDyslexic] = useState(false);
+  const [dyslexic, setDyslexic] = useState(false)
+  // const [dyslexic, setDyslexic] = useState(false);
   const [colorBlind, setColorBlind] = useState(false);
   const [highContrast, setHighContrast] = useState(false);
   const [largeButtons, setLargeButtons] = useState(false);
   const [notifyOn, setNotifyOn] = useState(true);
   const [trustedContacts, setTrustedContacts] = useState<TrustedContact[]>([]);
+  
+  useEffect(() => {
+    AsyncStorage.multiGet([
+      "aegis.app.dyslexic",
+      "aegis.app.colorBlind",
+      "aegis.app.highContrast",
+      "aegis.app.largeButtons",
+      "aegis.app.trustedContacts"
+    ]).then((stores) => {
+      stores.forEach(([key, value]) => {
+        if (key === "aegis.app.dyslexic" && value !== null) setDyslexic(JSON.parse(value));
+        if (key === "aegis.app.colorBlind" && value !== null) setColorBlind(JSON.parse(value));
+        if (key === "aegis.app.highContrast" && value !== null) setHighContrast(JSON.parse(value));
+        if (key === "aegis.app.largeButtons" && value !== null) setLargeButtons(JSON.parse(value));
+        if (key === "aegis.app.trustedContacts" && value !== null) setTrustedContacts(JSON.parse(value));
+      });
+    });
+  }, []);
+
+  // Save value on change
+  useEffect(() => { AsyncStorage.setItem("aegis.app.dyslexic", JSON.stringify(dyslexic)) }, [dyslexic]);
+  useEffect(() => { AsyncStorage.setItem("aegis.app.colorBlind", JSON.stringify(colorBlind)) }, [colorBlind]);
+  useEffect(() => { AsyncStorage.setItem("aegis.app.highContrast", JSON.stringify(highContrast)) }, [highContrast]);
+  useEffect(() => { AsyncStorage.setItem("aegis.app.largeButtons", JSON.stringify(largeButtons)) }, [largeButtons]);
+  useEffect(() => { AsyncStorage.setItem("aegis.app.trustedContacts", JSON.stringify(trustedContacts)) }, [trustedContacts]);
 
   const theme = useMemo<AccessibilityTheme>(() => {
     const screenBackground = highContrast ? "#000000" : "#F7F8FC";
@@ -67,7 +93,7 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
     const boxBorderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
     const buttonColor = colorBlind ? "#E69F00" : "#69B7C6";
     const buttonTextColor = colorBlind ? "#000000" : "#FFFFFF";
-    const interactableTextColor = highContrast ? "#E69F00": "#477d87"
+    const interactableTextColor = highContrast ? "#E69F00" : "#477d87"
 
     const font = dyslexic ? "OpenDyslexic" : undefined;
     const letterSpacing = dyslexic ? 1 : 0;

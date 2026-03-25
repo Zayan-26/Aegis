@@ -1,6 +1,5 @@
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { router, useNavigation } from "expo-router";
-import { Dispatch, SetStateAction, useState } from "react";
+import { router } from "expo-router";
 import {
   StyleSheet,
   Text,
@@ -11,10 +10,9 @@ import { useAccessibility } from "@/contexts/AccessibilityContext";
 import BackBtn from "@/components/back-button";
 import MapView, { Polyline, UrlTile } from "react-native-maps";
 import { TILE_URL } from "@/apis/endpoints";
-import { useSafetyRoutes } from "@/contexts/RoutingContext";
+import { region, useSafetyRoutes } from "@/contexts/RoutingContext";
 import { InternalRoutes } from "@/constants/routes";
 import { SafetyRoute } from "@/apis/request-route";
-import { NavNode } from "@/apis/request-navigation";
 
 const RouteConstants = {
   safest: {
@@ -22,20 +20,19 @@ const RouteConstants = {
     borderColor: "#2D7D6F",
     bgColor: "#F0FAF8",
     textColor: "#2D7D6F",
+    i: 1
   },
   fastest: {
     label: "Fastest Route",
     borderColor: "#E5A0A0",
     bgColor: "#FFF5F5",
     textColor: "#C0392B",
+    i: 0
   }
-}
-async function routeBtn(setRoute: Dispatch<SetStateAction<SafetyRoute[]>>, setNav: Dispatch<SetStateAction<NavNode[]>> ) {
-
 }
 function RouteSelection() {
   const { theme, highContrast } = useAccessibility();
-  const { destination, setCandidateRoutes, setNavigation } = useSafetyRoutes()
+  const { destination, setSelected } = useSafetyRoutes()
   //Internal Routes are placeholders, just uncomment the next line and comment the next one out / delete the next one.
   const candidateRoutes = InternalRoutes
   type ThemeRoutePair = {
@@ -43,36 +40,22 @@ function RouteSelection() {
       label: string
       borderColor: string,
       bgColor: string,
-      textColor: string
+      textColor: string,
+      i : number
     },
     route: SafetyRoute
   }
   const safest: ThemeRoutePair = {
     theme: RouteConstants.safest,
-    route: candidateRoutes.sort((a, b) => a.safetyScore - b.safetyScore)[0],
+    route: candidateRoutes.sort((a, b) => b.safetyScore - a.safetyScore)[0],
   }
 
   const fastest: ThemeRoutePair = {
     theme: RouteConstants.fastest,
-    route: candidateRoutes.sort((a, b) => b.duration - a.duration)[0],
+    route: candidateRoutes.sort((a, b) => a.duration - b.duration)[0],
   }
 
-  const allCoords = candidateRoutes.flatMap(route => route.coordinateArray);
 
-  const lats = allCoords.map(c => c.latitude);
-  const lngs = allCoords.map(c => c.longitude);
-
-  const minLat = Math.min(...lats);
-  const maxLat = Math.max(...lats);
-  const minLng = Math.min(...lngs);
-  const maxLng = Math.max(...lngs);
-
-  const region = {
-    latitude: (minLat + maxLat) / 2,
-    longitude: (minLng + maxLng) / 2,
-    latitudeDelta: (maxLat - minLat) + 0.01,
-    longitudeDelta: (maxLng - minLng) + 0.01,
-  };
   return (
     <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
       {/* <StatusBar backgroundColor={theme.screenBackground} /> */}
@@ -87,7 +70,7 @@ function RouteSelection() {
           showsPointsOfInterest={false}
           // pitchEnabled={false}
           // scrollEnabled={false}
-          region={region}
+          region={region(candidateRoutes)}
         >
           <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
           {[safest, fastest].map(({ theme, route }, _) => (
@@ -96,6 +79,7 @@ function RouteSelection() {
               coordinates={route.coordinateArray}
               strokeWidth={4}
               strokeColor={theme.textColor}
+              zIndex={theme.i}
             />
           ))}
         </MapView>
@@ -148,7 +132,10 @@ function RouteSelection() {
                         padding: theme.btnRadius - 4
                       },
                     ]}
-                    onPress={async () => await routeBtn(setCandidateRoutes, setNavigation)}
+                    onPress={() => {
+                      setSelected(route)
+                      router.push('/(tabs)/trip-detail-sq')
+                    }}
                     accessibilityRole="button"
                     accessibilityLabel={routeTheme.label}
                   >
