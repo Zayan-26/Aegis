@@ -10,7 +10,7 @@ import { useAccessibility } from "@/contexts/AccessibilityContext";
 import BackBtn from "@/components/back-button";
 import MapView, { Polyline, UrlTile } from "react-native-maps";
 import { BASE_TILE_URL, DARK_TILE_URL } from "@/apis/endpoints";
-import { region, useSafetyRoutes } from "@/contexts/RoutingContext";
+import { region, useAegisRouting } from "@/contexts/RoutingContext";
 import { InternalRoutes } from "@/constants/routes";
 import { SafetyRoute } from "@/apis/request-route";
 
@@ -34,7 +34,7 @@ const RouteConstants = {
 }
 function RouteSelection() {
   const { theme, highContrast } = useAccessibility();
-  const { destination, setSelected, setCandidateRoutes, setDestination} = useSafetyRoutes()
+  const { destination, setSelected, setCandidateRoutes, setDestination} = useAegisRouting()
   //Internal Routes are placeholders, just uncomment the next line and comment the next one out / delete the next one.
   const candidateRoutes = InternalRoutes
   //Hook this on once we stop using internal routes.
@@ -143,7 +143,7 @@ function RouteSelection() {
                     ]}
                     onPress={() => {
                       setSelected(route)
-                      router.push('/(tabs)/trip-detail')
+                      router.push('/trip-detail')
                     }}
                     accessibilityRole="button"
                     accessibilityLabel={routeTheme.label}

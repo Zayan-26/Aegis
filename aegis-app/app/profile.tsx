@@ -13,6 +13,7 @@ import {
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackBtn from "@/components/back-button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ProfileScreen() {
   const {
@@ -25,6 +26,10 @@ export default function ProfileScreen() {
     setTrustedContacts,
     theme,
   } = useAccessibility();
+  const {
+    setDisplayName,
+    setToken
+  } = useAuth()
 
   const btnPadding = largeButtons ? 18 : 14;
 
@@ -34,6 +39,8 @@ export default function ProfileScreen() {
     setHighContrast(false);
     setLargeButtons(false);
     setTrustedContacts([]);
+    setDisplayName(null)
+    setToken(null)
   };
 
   const handleLogOut = () => {

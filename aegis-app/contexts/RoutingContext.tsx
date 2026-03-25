@@ -55,7 +55,7 @@ export function RoutingProvider({ children }: { children: ReactNode }) {
     return <RoutingContext.Provider value={value}>{children}</RoutingContext.Provider>
 }
 
-export function useSafetyRoutes(): RoutingContextValue {
+export function useAegisRouting(): RoutingContextValue {
     const ctx = useContext(RoutingContext)
     if (!ctx) throw new Error("useSafetyRoutes must be used within a SafetyRoutesProvider");
     return ctx

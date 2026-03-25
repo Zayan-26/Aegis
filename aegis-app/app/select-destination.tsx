@@ -14,7 +14,7 @@ import BrumMap from "@/components/map";
 import { Poi } from "@/apis/request-poi";
 import { fetchRoutes } from "@/apis/request-route";
 import { LatLng } from "react-native-maps";
-import { useSafetyRoutes } from "@/contexts/RoutingContext"
+import { useAegisRouting } from "@/contexts/RoutingContext"
 import * as Location from "expo-location"
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -33,7 +33,7 @@ const selectRoute = async (destination: LatLng, token: string | null) => {
   // })
   Location.getLastKnownPositionAsync().then(async source => {
     const routes = await fetchRoutes({ latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0 }, destination, token)
-    const { setCandidateRoutes } = useSafetyRoutes();
+    const { setCandidateRoutes } = useAegisRouting();
     setCandidateRoutes(routes)
     router.push("/select-route")
   })

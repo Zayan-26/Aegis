@@ -111,7 +111,7 @@ export default function TrustedContactsScreen() {
       return;
     }
     setTrustedContacts(trusted);
-    router.push("/(tabs)/select-destination");
+    router.push("/select-destination");
   };
 
   if (permissionDenied) {
@@ -356,7 +356,7 @@ export default function TrustedContactsScreen() {
         <TouchableOpacity
           onPress={() => {
             setTrustedContacts([]);
-            router.push("/(tabs)/select-destination");
+            router.push("/select-destination");
           }}
         >
           <Text

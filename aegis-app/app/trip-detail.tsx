@@ -2,7 +2,7 @@ import { BASE_TILE_URL, DARK_TILE_URL } from "@/apis/endpoints"
 import BackBtn from "@/components/back-button"
 import { InternalRoutes } from "@/constants/routes"
 import { useAccessibility } from "@/contexts/AccessibilityContext"
-import { region, useSafetyRoutes } from "@/contexts/RoutingContext"
+import { region, useAegisRouting } from "@/contexts/RoutingContext"
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet"
 import { router } from "expo-router"
 import { useMemo, useRef, useState } from "react"
@@ -26,7 +26,7 @@ function Avatar({ name, color }: { name: string; color: string }) {
 
 function TripDetails() {
     const { theme, highContrast, trustedContacts } = useAccessibility()
-    const { setSelected } = useSafetyRoutes()
+    const { setSelected } = useAegisRouting()
     // const { destination } = useSafetyRoutes()
     const selected = InternalRoutes[0]
     //PLACEHOLDER
@@ -282,6 +282,8 @@ function TripDetails() {
                         {*/}
 
                         <TouchableOpacity
+                        //TODO
+                            onPress={() => {}}
                             style={[
                                 styles.startBtn,
                                 {

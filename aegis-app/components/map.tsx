@@ -5,7 +5,7 @@ import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { fetchNearbyPois, Poi, poiLabel } from "@/apis/request-poi";
 import { BASE_TILE_URL, DARK_TILE_URL } from "@/apis/endpoints";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
-import { RoutingProvider, useSafetyRoutes } from "@/contexts/RoutingContext";
+import { RoutingProvider, useAegisRouting } from "@/contexts/RoutingContext";
 
 type DestinationMarker = {
   id: number;
@@ -27,7 +27,7 @@ type BrumMapProps = {
 export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
   const { theme, highContrast } = useAccessibility();
   const mapRef = useRef<MapView | null>(null);
-  const {setDestination} = useSafetyRoutes()
+  const {setDestination} = useAegisRouting()
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["20%", "45%"], []);
 
