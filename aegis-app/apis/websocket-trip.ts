@@ -4,10 +4,11 @@ import { TRIP_ENDPOINT } from "./endpoints";
 export function createSocket() : WebSocket{
     return new WebSocket(TRIP_ENDPOINT)
 }
-export function startTrip(userToken: string, routeToken: string, socket: WebSocket){
+export function startTrip(userToken: string, routeToken: string, companionNumbers: string[], socket: WebSocket){
     socket.send(JSON.stringify({
         userToken,
         routeToken,
+        companionNumbers,
         type: "START_TRIP"
     }))
     //TODO: Start polling loop
