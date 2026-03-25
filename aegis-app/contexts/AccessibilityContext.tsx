@@ -79,11 +79,11 @@ export function AccessibilityProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Save value on change
-  useEffect(() => { AsyncStorage.setItem("aegis.app.dyslexic", JSON.stringify(dyslexic)) }, [dyslexic]);
-  useEffect(() => { AsyncStorage.setItem("aegis.app.colorBlind", JSON.stringify(colorBlind)) }, [colorBlind]);
-  useEffect(() => { AsyncStorage.setItem("aegis.app.highContrast", JSON.stringify(highContrast)) }, [highContrast]);
-  useEffect(() => { AsyncStorage.setItem("aegis.app.largeButtons", JSON.stringify(largeButtons)) }, [largeButtons]);
-  useEffect(() => { AsyncStorage.setItem("aegis.app.trustedContacts", JSON.stringify(trustedContacts)) }, [trustedContacts]);
+  useEffect(() => { AsyncStorage.setItem("aegis.app.dyslexic", JSON.stringify(dyslexic)) }, [setDyslexic]);
+  useEffect(() => { AsyncStorage.setItem("aegis.app.colorBlind", JSON.stringify(colorBlind)) }, [setColorBlind]);
+  useEffect(() => { AsyncStorage.setItem("aegis.app.highContrast", JSON.stringify(highContrast)) }, [setHighContrast]);
+  useEffect(() => { AsyncStorage.setItem("aegis.app.largeButtons", JSON.stringify(largeButtons)) }, [setLargeButtons]);
+  useEffect(() => { AsyncStorage.setItem("aegis.app.trustedContacts", JSON.stringify(trustedContacts)) }, [setTrustedContacts]);
 
   const theme = useMemo<AccessibilityTheme>(() => {
     const screenBackground = highContrast ? "#000000" : "#F7F8FC";

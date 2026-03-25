@@ -19,24 +19,17 @@ import * as Location from "expo-location"
 import { useAuth } from "@/contexts/AuthContext";
 
 const selectRoute = async (destination: LatLng, token: string | null) => {
-  let { status } = await Location.requestForegroundPermissionsAsync()
-  if (status != 'granted') throw Error("Permission Denied.")
-  if (!token) throw Error("Not logged in. How are you here?")
-  // GetLocation.getCurrentPosition({
-  //   enableHighAccuracy: true,
-  //   timeout: 60000
-  // }).then(async source => {
-  //   const routes = await fetchRoutes(source, destination)
-  //   const { setCandidateRoutes } = useSafetyRoutes();
+  // let { status } = await Location.requestForegroundPermissionsAsync()
+  // if (status != 'granted') throw Error("Permission Denied.")
+  // if (!token) throw Error("Not logged in. How are you here?")
+
+  // Location.getLastKnownPositionAsync().then(async source => {
+  //   const routes = await fetchRoutes({ latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0 }, destination, token)
+  //   const { setCandidateRoutes } = useAegisRouting();
   //   setCandidateRoutes(routes)
   //   router.push("/select-route")
   // })
-  Location.getLastKnownPositionAsync().then(async source => {
-    const routes = await fetchRoutes({ latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0 }, destination, token)
-    const { setCandidateRoutes } = useAegisRouting();
-    setCandidateRoutes(routes)
     router.push("/select-route")
-  })
 };
 
 export default function SelectDestination() {

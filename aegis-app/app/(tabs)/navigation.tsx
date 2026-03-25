@@ -5,7 +5,7 @@ import { InternalRoutes } from "@/constants/routes"
 import { useAccessibility } from "@/contexts/AccessibilityContext"
 import { region, useAegisRouting } from "@/contexts/RoutingContext"
 import { router } from "expo-router"
-import { useEffect, useRef, useState } from "react"
+import { ComponentProps, useEffect, useRef, useState } from "react"
 import { TouchableOpacity, View } from "react-native"
 import { StyleSheet, Text } from "react-native"
 import MapView, { Polyline, UrlTile } from "react-native-maps"
@@ -16,26 +16,32 @@ import { InternalNav } from "@/constants/nav"
 import { createSocket, endTrip, locationUpdate, startTrip } from "@/apis/websocket-trip"
 import { useAuth } from "@/contexts/AuthContext"
 
-const Icons = {
+type IoniconName = ComponentProps<typeof Ionicons>['name']
+
+const Icons: Record<string, IoniconName> = {
     forward: 'arrow-up',
-    right: 'arrow-forwad',
+    right: 'arrow-forward',
     left: 'arrow-back'
 }
-const getIcon: (instruction: string) => string | null = (instruction: string) => {
-    try {
-        const l = instruction.split(' ')
-        if (l[0] === 'Continue' || l[0] === 'Keep') return Icons.forward
-        else if (l[0] === 'Turn') {
-            switch (l[1]) {
-                case 'Left':
-                    return Icons.left
-                case 'Right':
-                    return Icons.right
-                default:
-                    return null
-            }
+const getIcon: (instruction: string) => IoniconName | null = (instruction: string) => {
+    const l = instruction.split(' ')
+    if (l[0] === 'Continue' || l[0] === 'Keep') return Icons.forward
+    else if (l[0] === 'Turn') {
+        switch (l[1]) {
+            case 'left':
+                return Icons.left
+            case 'right':
+                return Icons.right
+            case 'sharp':
+                switch(l[2]){
+                    case 'left':
+                        return Icons.left
+                    case 'right':
+                        return Icons.right
+                }
         }
-    } finally { return null }
+    }
+    return null
 }
 
 function Navigation() {
@@ -43,25 +49,29 @@ function Navigation() {
     // const { navigation, selected } = useAegisRouting()
     const navigation = InternalNav
     const selected = InternalRoutes[0]
-    const socket = createSocket()
-    const { token } = useAuth()
+    // TODO: re-enable once sockets are done
+    // const socket = createSocket()
+    // const { token } = useAuth()
+    // const pollHandle = setInterval(Poll, 1)
 
-    if (token && selected) startTrip(token, selected?.token, socket)
-    else throw Error("Token or selected route missing. You're not supposed to be here.")
+    // TODO: re-enable once sockets are done
+    // if (token && selected) startTrip(token, selected?.token, socket)
+    // else throw Error("Token or selected route missing. You're not supposed to be here.")
 
     var StepNum = 0
     const { theme, highContrast } = useAccessibility()
     const [currentNN, setNN] = useState<NavNode | undefined>(undefined)
-
+    var [currentIcon, setCurrentIcon] = useState<IoniconName | undefined>(undefined)
     async function Poll() {
         const location = await Location.getLastKnownPositionAsync()
         if (!location || !currentNN) return
-        if (getDistance({ longitude: location?.coords.longitude, latitude: location?.coords.latitude }, { longitude: currentNN.coordinates.longitude, latitude: currentNN.coordinates.latitude }) < 10) {
+        if (getDistance({ longitude: location?.coords.longitude, latitude: location?.coords.latitude }, { longitude: currentNN.coordinates.longitude, latitude: currentNN.coordinates.latitude }) < 2) {
             Step()
         }
-        if (token) if (location) locationUpdate(token, location.coords, socket)
-            else throw Error("Location not found.")
-        else throw Error("User Token doesn't exist.")
+        // TODO: re-enable once sockets are done
+        // if (token) if (location) locationUpdate(token, location.coords, socket)
+        // else throw Error("Location not found.")
+        // else throw Error("User Token doesn't exist.")
     }
     async function Step() {
         if (StepNum < navigation.length - 2) {
@@ -69,19 +79,23 @@ function Navigation() {
             setNN(navigation[StepNum])
         }
         else if (currentNN === navigation.at(-1)) {
-            if (token) if (selected) { endTrip(token, selected.token, socket); Cleanup() }
-                else throw Error("We're all out of nodes (I got hungry")
-            else throw Error("User token doesn't exist.")
+            // TODO: re-enable once sockets are done
+            // if (token) if (selected) { endTrip(token, selected.token, socket); Cleanup() }
+            // else throw Error("We're all out of nodes (I got hungry")
+            // else throw Error("User token doesn't exist.")
         }
     }
     function Cleanup() {
-
+        //TODO
+        // clearInterval(pollHandle)
     }
     useEffect(() => {
-
+        setCurrentIcon(currentNN ? getIcon(currentNN.directions) ?? undefined : undefined)
     }, [currentNN])
+    useEffect(() => {
+        setNN(navigation[10])
+    }, [])
 
-    //TODO
     return (
         <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
             <TouchableOpacity onPress={() => router.push("/profile")} style={styles.profileBtn}>
@@ -98,9 +112,9 @@ function Navigation() {
                     backgroundColor: theme.boxBackground
                 }}
             >
-                <Ionicons name='arrow-back' size={64} style={{ paddingHorizontal: 28 }} />
-                <Text style={{ paddingHorizontal: 28, flex: 1, fontSize: (theme.dyslexicFontSize ?? 13) + 30 }}>
-                    HI
+                {currentNN ? (<Ionicons name={currentIcon} size={64} style={{ paddingLeft: 28, paddingRight: 14}} />) : undefined}
+                <Text style={{ paddingHorizontal: 28, flex: 1, fontSize: (theme.dyslexicFontSize ?? 13) + 20 }}>
+                    {currentNN?.directions}
                 </Text>
             </View>
             <View style={[styles.mapBox, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
@@ -114,6 +128,12 @@ function Navigation() {
                     region={{ longitude: selected.coordinateArray[0].longitude, latitude: selected.coordinateArray[0].latitude, latitudeDelta: 0.001, longitudeDelta: 0.001 }}
                 >
                     <UrlTile urlTemplate={highContrast ? DARK_TILE_URL : BASE_TILE_URL} shouldReplaceMapContent />
+                    {selected ? <Polyline
+                        key={selected.token}
+                        coordinates={selected.coordinateArray}
+                        strokeWidth={4}
+                        strokeColor={highContrast ? "#d0d003" : "#2e2efc"}
+                    /> : null}
                 </MapView>
             </View>
         </View>

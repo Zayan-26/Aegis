@@ -1,10 +1,13 @@
 import { BASE_TILE_URL, DARK_TILE_URL } from "@/apis/endpoints"
+import { fetchNavigation } from "@/apis/request-navigation"
 import BackBtn from "@/components/back-button"
 import { InternalRoutes } from "@/constants/routes"
 import { useAccessibility } from "@/contexts/AccessibilityContext"
+import { useAuth } from "@/contexts/AuthContext"
 import { region, useAegisRouting } from "@/contexts/RoutingContext"
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet"
 import { router } from "expo-router"
+import { push } from "expo-router/build/global-state/routing"
 import { useMemo, useRef, useState } from "react"
 import { StyleSheet, TouchableOpacity, View, Text, Switch } from "react-native"
 import MapView, { UrlTile, Polyline } from "react-native-maps"
@@ -27,6 +30,7 @@ function Avatar({ name, color }: { name: string; color: string }) {
 function TripDetails() {
     const { theme, highContrast, trustedContacts } = useAccessibility()
     const { setSelected } = useAegisRouting()
+    const { token } = useAuth()
     // const { destination } = useSafetyRoutes()
     const selected = InternalRoutes[0]
     //PLACEHOLDER
@@ -40,6 +44,10 @@ function TripDetails() {
     const textColor = highContrast ? "#d0d003" : "#0e0efc"
     const backBtn = () => {
         setSelected(undefined)
+    }
+    const navigationBtn = async () => {
+        if(token) await fetchNavigation(token, selected.token)
+        router.push('/(tabs)/navigation')
     }
     const [sharedContacts, setSharedContacts] = useState<Record<string, boolean>>(
         Object.fromEntries(trustedContacts.map((c) => [c.id, true])),
@@ -283,7 +291,7 @@ function TripDetails() {
 
                         <TouchableOpacity
                         //TODO
-                            onPress={() => {}}
+                            onPress={() => navigationBtn()}
                             style={[
                                 styles.startBtn,
                                 {
