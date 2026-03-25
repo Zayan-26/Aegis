@@ -1,3 +1,5 @@
+USE aegis;
+
 INSERT INTO unsafe_zones (zone_name, min_lat, min_lon, max_lat, max_lon, safety_multiplier) VALUES
 
 -- Very unsafe zone (heavy penalty)
