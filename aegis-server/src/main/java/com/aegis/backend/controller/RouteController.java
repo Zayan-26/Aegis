@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.aegis.backend.entity.UnsafeZone;
 import com.aegis.backend.repository.UnsafeZoneRepository;
+import com.aegis.backend.service.RouteCache;
 import com.aegis.backend.service.RoutingService;
 import com.graphhopper.GHResponse;
 import com.graphhopper.ResponsePath;
@@ -28,6 +29,9 @@ public class RouteController {
 
     @Autowired
     private UnsafeZoneRepository unsafeZoneRepository;
+
+    @Autowired
+    private RouteCache routeCache;
 
     @GetMapping("/calculate")
     public ResponseEntity<?> calculateRoute(
