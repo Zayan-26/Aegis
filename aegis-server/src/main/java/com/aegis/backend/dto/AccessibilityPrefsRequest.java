@@ -1,5 +1,4 @@
 package com.aegis.backend.dto;
-
 import lombok.Data;
 
 @Data
