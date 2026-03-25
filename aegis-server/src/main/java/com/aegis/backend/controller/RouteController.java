@@ -36,38 +36,81 @@ public class RouteController {
             @RequestParam double endLat,
             @RequestParam double endLon) {
 
+        // retrieve unsafe zones from database
         List<UnsafeZone> dangerousZones = unsafeZoneRepository.findAll();
-        GHResponse response = routingService.getRoute(startLat, startLon, endLat, endLon, dangerousZones);
 
-        if (response.hasErrors()) {
-            return ResponseEntity.badRequest().body(response.getErrors().toString());
+        // fastest route calculation
+        GHResponse fastestResponse = routingService.getRoute(startLat, startLon, endLat, endLon, new ArrayList<>());
+        if (fastestResponse.hasErrors()) {
+            return ResponseEntity.badRequest().body("Fastest Route Error: " + fastestResponse.getErrors().toString());
         }
 
-        ResponsePath path = response.getBest();
+        // safest route calculation
+        GHResponse safestResponse = routingService.getRoute(startLat, startLon, endLat, endLon, dangerousZones);
+        if (safestResponse.hasErrors()) {
+            return ResponseEntity.badRequest().body("Safest Route Error: " + safestResponse.getErrors().toString());
+        }
+
+        // score calculation
+        int fastestScore = calculateSafetyScore(fastestResponse.getBest().getPoints(), dangerousZones);
+        int safestScore = calculateSafetyScore(safestResponse.getBest().getPoints(), dangerousZones);
+
+        // array fro frontend
+        List<Map<String, Object>> safetyRouteArray = new ArrayList<>();
+
+        // add routes to array with scores
+        safetyRouteArray.add(formatRouteData(fastestResponse.getBest(), fastestScore));
+        safetyRouteArray.add(formatRouteData(safestResponse.getBest(), safestScore));
+
+        return ResponseEntity.ok(safetyRouteArray);
+    }
+
+    private int calculateSafetyScore(PointList points, List<UnsafeZone> zones) {
+        double currentScore = 100.0; 
+        List<Long> unsafeZoneIds = new ArrayList<>(); 
+
+        // Looping through coordinates on route
+        for (int i = 0; i < points.size(); i++) {
+            double lat = points.getLat(i);
+            double lon = points.getLon(i);
+
+            // check to see we are in an unsafe area
+            for (UnsafeZone zone : zones) {
+                // add penalty if we have went in unsafe zone
+                if (!unsafeZoneIds.contains(zone.getId())) {
+                    
+                    if (lat >= zone.getMinLat() && lat <= zone.getMaxLat() &&
+                        lon >= zone.getMinLon() && lon <= zone.getMaxLon()) {
+                        
+                        // penalty calculation
+                        currentScore = currentScore * zone.getSafetyMultiplier();
+                        
+                        // check to make sure multiple penalties aren't applied
+                        unsafeZoneIds.add(zone.getId());
+                    }
+                }
+            }
+        }
+        return (int) Math.max(0, Math.round(currentScore));
+    }
+
+    //formatting method so it is passed to frontend in desired format
+    private Map<String, Object> formatRouteData(ResponsePath path, int safetyScore) {
         PointList pointList = path.getPoints();
-        
-        // coordinate array
         List<Map<String, Double>> coordinateArray = new ArrayList<>();
+        
         for (int i = 0; i < pointList.size(); i++) {
             coordinateArray.add(Map.of(
                     "latitude", pointList.getLat(i),
                     "longitude", pointList.getLon(i)
             ));
         }
-
-        // 2. Generate a unique Token for this specific route
-        String routeToken = UUID.randomUUID().toString();
-
-        // mock safety score
-        int safetyScore = 98; 
-        
-        // returning JSON format
-        return ResponseEntity.ok(Map.of(
+        return Map.of(
                 "coordinateArray", coordinateArray,
                 "safetyScore", safetyScore,
                 "duration", path.getTime(),  
-                "distance", path.getDistance(), 
-                "token", routeToken
-        ));
+                "distance", path.getDistance(),
+                "token", UUID.randomUUID().toString()
+        );
     }
 }
