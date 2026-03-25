@@ -53,6 +53,10 @@ def route() -> tuple:
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
 
+    if source == destination:
+        return jsonify({"error": "Source and destination cannot be the same"}), 400 #added validation check
+
+
     return jsonify({
         "source": source,
         "destination": destination,
