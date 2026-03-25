@@ -6,7 +6,7 @@ import { useAccessibility } from "@/contexts/AccessibilityContext"
 import { region, useAegisRouting } from "@/contexts/RoutingContext"
 import { router } from "expo-router"
 import { ComponentProps, useEffect, useRef, useState } from "react"
-import { TouchableOpacity, View } from "react-native"
+import { StatusBar, TouchableOpacity, View } from "react-native"
 import { StyleSheet, Text } from "react-native"
 import MapView, { Polyline, UrlTile } from "react-native-maps"
 import Ionicons from "@expo/vector-icons/Ionicons"
@@ -15,6 +15,7 @@ import * as Location from "expo-location"
 import { InternalNav } from "@/constants/nav"
 import { createSocket, endTrip, locationUpdate, startTrip } from "@/apis/websocket-trip"
 import { useAuth } from "@/contexts/AuthContext"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 type IoniconName = ComponentProps<typeof Ionicons>['name']
 
@@ -33,7 +34,7 @@ const getIcon: (instruction: string) => IoniconName | null = (instruction: strin
             case 'right':
                 return Icons.right
             case 'sharp':
-                switch(l[2]){
+                switch (l[2]) {
                     case 'left':
                         return Icons.left
                     case 'right':
@@ -44,6 +45,7 @@ const getIcon: (instruction: string) => IoniconName | null = (instruction: strin
     return null
 }
 
+var loopCount = 0 // I'm not making a different function + interval + explosion for this vro
 function Navigation() {
     // TODO: once the endpoints are set up again change this back from the internal placeholder
     // const { navigation, selected } = useAegisRouting()
@@ -74,15 +76,21 @@ function Navigation() {
         // else throw Error("User Token doesn't exist.")
     }
     async function Step() {
-        if (StepNum < navigation.length - 2) {
-            StepNum++
-            setNN(navigation[StepNum])
+        if (loopCount < 30) {
+            loopCount++
         }
-        else if (currentNN === navigation.at(-1)) {
-            // TODO: re-enable once sockets are done
-            // if (token) if (selected) { endTrip(token, selected.token, socket); Cleanup() }
-            // else throw Error("We're all out of nodes (I got hungry")
-            // else throw Error("User token doesn't exist.")
+        else {
+            if (StepNum < navigation.length - 2) {
+                StepNum++
+                setNN(navigation[StepNum])
+            }
+            else if (currentNN === navigation.at(-1)) {
+                // TODO: re-enable once sockets are done
+                // if (token) if (selected) { endTrip(token, selected.token, socket); Cleanup() }
+                // else throw Error("We're all out of nodes (I got hungry")
+                // else throw Error("User token doesn't exist.")
+            }
+            loopCount = 0
         }
     }
     function Cleanup() {
@@ -97,46 +105,52 @@ function Navigation() {
     }, [])
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
-            <TouchableOpacity onPress={() => router.push("/profile")} style={styles.profileBtn}>
-                <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
-            </TouchableOpacity>
-            <BackBtn />
-            <View
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 10,
-                    paddingTop: 16,
-                    paddingBottom: 16,
-                    backgroundColor: theme.boxBackground
-                }}
-            >
-                {currentNN ? (<Ionicons name={currentIcon} size={64} style={{ paddingLeft: 28, paddingRight: 14}} />) : undefined}
-                <Text style={{ paddingHorizontal: 28, flex: 1, fontSize: (theme.dyslexicFontSize ?? 13) + 20 }}>
-                    {currentNN?.directions}
-                </Text>
-            </View>
-            <View style={[styles.mapBox, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
-                <MapView
-                    style={{ flex: 1 }}
-                    mapType="none"
-                    showsPointsOfInterest={false}
-                    // region={selected ? region([selected]) : undefined}
-                    followsUserLocation={true}
-                    showsUserLocation={true}
-                    region={{ longitude: selected.coordinateArray[0].longitude, latitude: selected.coordinateArray[0].latitude, latitudeDelta: 0.001, longitudeDelta: 0.001 }}
+        <SafeAreaView style={{ backgroundColor: theme.screenBackground, flex: 1}}>
+            <StatusBar
+                barStyle={highContrast ? "light-content" : "dark-content"}
+                backgroundColor={theme.screenBackground}
+            />
+            <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
+                <TouchableOpacity onPress={() => router.push("/profile")} style={styles.profileBtn}>
+                    <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
+                </TouchableOpacity>
+                <BackBtn />
+                <View
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        gap: 10,
+                        paddingTop: 16,
+                        paddingBottom: 16,
+                        backgroundColor: theme.boxBackground
+                    }}
                 >
-                    <UrlTile urlTemplate={highContrast ? DARK_TILE_URL : BASE_TILE_URL} shouldReplaceMapContent />
-                    {selected ? <Polyline
-                        key={selected.token}
-                        coordinates={selected.coordinateArray}
-                        strokeWidth={4}
-                        strokeColor={highContrast ? "#d0d003" : "#2e2efc"}
-                    /> : null}
-                </MapView>
+                    {currentNN ? (<Ionicons name={currentIcon} size={64} style={{ paddingLeft: 28, paddingRight: 14 }} />) : undefined}
+                    <Text style={{ paddingHorizontal: 28, flex: 1, fontSize: (theme.dyslexicFontSize ?? 13) + 20 }}>
+                        {currentNN?.directions}
+                    </Text>
+                </View>
+                <View style={[styles.mapBox, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
+                    <MapView
+                        style={{ flex: 1 }}
+                        mapType="none"
+                        showsPointsOfInterest={false}
+                        // region={selected ? region([selected]) : undefined}
+                        followsUserLocation={true}
+                        showsUserLocation={true}
+                        region={{ longitude: selected.coordinateArray[0].longitude, latitude: selected.coordinateArray[0].latitude, latitudeDelta: 0.001, longitudeDelta: 0.001 }}
+                    >
+                        <UrlTile urlTemplate={highContrast ? DARK_TILE_URL : BASE_TILE_URL} shouldReplaceMapContent />
+                        {selected ? <Polyline
+                            key={selected.token}
+                            coordinates={selected.coordinateArray}
+                            strokeWidth={4}
+                            strokeColor={highContrast ? "#d0d003" : "#2e2efc"}
+                        /> : null}
+                    </MapView>
+                </View>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 export default Navigation

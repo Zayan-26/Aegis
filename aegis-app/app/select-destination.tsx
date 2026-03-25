@@ -19,21 +19,20 @@ import * as Location from "expo-location"
 import { useAuth } from "@/contexts/AuthContext";
 
 const selectRoute = async (destination: LatLng, token: string | null) => {
-  // let { status } = await Location.requestForegroundPermissionsAsync()
-  // if (status != 'granted') throw Error("Permission Denied.")
-  // if (!token) throw Error("Not logged in. How are you here?")
+  let { status } = await Location.requestForegroundPermissionsAsync()
+  if (status != 'granted') throw Error("Permission Denied.")
+  if (!token) throw Error("Not logged in. How are you here?")
 
-  // Location.getLastKnownPositionAsync().then(async source => {
-  //   const routes = await fetchRoutes({ latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0 }, destination, token)
-  //   const { setCandidateRoutes } = useAegisRouting();
-  //   setCandidateRoutes(routes)
-  //   router.push("/select-route")
-  // })
+  Location.getLastKnownPositionAsync().then(async source => {
+    const routes = await fetchRoutes({ latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0 }, destination, token)
+    const { setCandidateRoutes } = useAegisRouting();
+    setCandidateRoutes(routes)
     router.push("/select-route")
+  })
 };
 
 export default function SelectDestination() {
-  const { highContrast, largeButtons, theme } = useAccessibility();
+  const { highContrast, theme } = useAccessibility();
   const [destination, setDestination] = useState<Poi | null>(null);
   const { token } = useAuth()
 
@@ -152,7 +151,7 @@ export default function SelectDestination() {
             },
           ]}
           // onPress={() => router.push({ pathname: "/select-route"})}
-          onPress={async () => await selectRoute({ latitude: destination?.poi_lat ?? 0, longitude: destination?.poi_lng ?? 0}, token)}
+          onPress={async () => await selectRoute({ latitude: destination?.poi_lat ?? 0, longitude: destination?.poi_lng ?? 0 }, token)}
           disabled={destination == null}
           accessibilityRole="button"
           accessibilityLabel="Start Journey"

@@ -5,6 +5,7 @@ export type SafetyRoute = {
     coordinateArray: LatLng[],
     safetyScore: number
     duration: number,
+    //it's in miliseconds. end me.
     distance: number,
     token: string
 }
