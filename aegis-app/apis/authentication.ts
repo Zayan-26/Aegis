@@ -2,7 +2,7 @@ import { AUTH_ENDPOINT } from "../constants/endpoints";
 // import { setItemAsync } from "expo-secure-store";
 import * as SecureStore from "expo-secure-store"
 
-export async function create(fullName: string, email: string, password: string) : Promise<Error | undefined>
+export async function create(fullName: string, email: string, password: string, phoneNo: string) : Promise<Error | undefined>
 {
     const res = await fetch(`${AUTH_ENDPOINT}/api/auth/register`, {
         method: "POST",
@@ -10,7 +10,8 @@ export async function create(fullName: string, email: string, password: string) 
         body: JSON.stringify({
            fullName,
            email,
-           password
+           password,
+           phoneNo
         })
     })
     if(!res.ok){

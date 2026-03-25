@@ -5,15 +5,15 @@ import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Toast } from "toastify-react-native";
 
-async function registerBtn(fullName: string, email: string, password: string, confirmpwd: string, clearpwdCallback: () => void) {
-  if (fullName.length <= 0 || email.length <= 0 || password.length <= 0 || confirmpwd.length <= 0) {
+async function registerBtn(fullName: string, email: string, password: string, confirmpwd: string, pno: string, clearpwdCallback: () => void) {
+  if (fullName.length <= 0 || email.length <= 0 || password.length <= 0 || confirmpwd.length <= 0 || pno.length <= 0) {
     Toast.error('Input cannot be empty.')
   }
   else if (password !== confirmpwd) {
     Toast.error('Passwords do not match.')
   }
   else {
-    const err = await create(fullName, email, password)
+    const err = await create(fullName, email, password, pno)
     if (err) {
       Toast.error(err.message)
       // router.replace('/')
@@ -30,6 +30,7 @@ export default function CreateAccountScreen() {
   const [email, setEmail] = useState('')
   const [passwd, setPasswd] = useState('')
   const [rpasswd, setRPasswd] = useState('')
+  const [pNo, setPNO] = useState('')
 
   return (
     <View style={styles.container}>
@@ -54,6 +55,12 @@ export default function CreateAccountScreen() {
           onChangeText={setEmail}
         />
         <TextInput
+          placeholder="Phone No."
+          placeholderTextColor="#7A869A"
+          style={styles.input}
+          onChangeText={setPNO}
+        />
+        <TextInput
           placeholder="Password"
           placeholderTextColor="#7A869A"
           secureTextEntry
@@ -71,7 +78,7 @@ export default function CreateAccountScreen() {
         />
         <TouchableOpacity
           style={styles.createAccountButton}
-          onPress={async () => await registerBtn(fullName, email, passwd, rpasswd, () => {
+          onPress={async () => await registerBtn(fullName, email, passwd, rpasswd, pNo, () => {
             setPasswd("")
             setRPasswd("")
           })}>
