@@ -25,3 +25,5 @@ CREATE TABLE users (user_id CHAR(36) NOT NULL,
   constraint chk_users_deactivated check (deactivated_at IS NULL or deactivated_at >= created_at)
 );
 
+ALTER TABLE users ADD COLUMN push_token VARCHAR(255) NULL;
+
