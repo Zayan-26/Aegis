@@ -1,12 +1,15 @@
 {
-  "styles": [
-    {
-      "style": "style.json"
+  "styles": {
+    "basic": {
+      "style": "light-style.json"
+    },
+    "dark": {
+      "style": "dark-style.json"
     }
-  ],
+  },
   "data": {
     "openmaptiles": {
-        "mbtiles": "brum.mbtiles"
+      "mbtiles": "brum.mbtiles"
     }
   }
 }

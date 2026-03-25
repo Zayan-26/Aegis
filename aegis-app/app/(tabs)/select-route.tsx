@@ -9,7 +9,7 @@ import {
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import BackBtn from "@/components/back-button";
 import MapView, { Polyline, UrlTile } from "react-native-maps";
-import { TILE_URL } from "@/apis/endpoints";
+import { BASE_TILE_URL, DARK_TILE_URL } from "@/apis/endpoints";
 import { region, useSafetyRoutes } from "@/contexts/RoutingContext";
 import { InternalRoutes } from "@/constants/routes";
 import { SafetyRoute } from "@/apis/request-route";
@@ -19,28 +19,37 @@ const RouteConstants = {
     label: "Safest Route",
     borderColor: "#2D7D6F",
     bgColor: "#F0FAF8",
-    textColor: "#2D7D6F",
+    baseStrokeColor: "#2D7D6F",
+    darkStrokeColor: "#d28391",
     i: 1
   },
   fastest: {
     label: "Fastest Route",
     borderColor: "#E5A0A0",
     bgColor: "#FFF5F5",
-    textColor: "#C0392B",
+    baseStrokeColor: "#C0392B",
+    darkStrokeColor: "#40c6d4",
     i: 0
   }
 }
 function RouteSelection() {
   const { theme, highContrast } = useAccessibility();
-  const { destination, setSelected } = useSafetyRoutes()
+  const { destination, setSelected, setCandidateRoutes, setDestination} = useSafetyRoutes()
   //Internal Routes are placeholders, just uncomment the next line and comment the next one out / delete the next one.
   const candidateRoutes = InternalRoutes
+  //Hook this on once we stop using internal routes.
+  const backBtnPressed = () => {
+    setSelected(undefined)
+    setCandidateRoutes([])
+    setDestination(undefined)
+  }
   type ThemeRoutePair = {
     theme: {
       label: string
       borderColor: string,
       bgColor: string,
-      textColor: string,
+      baseStrokeColor: string,
+      darkStrokeColor: string
       i : number
     },
     route: SafetyRoute
@@ -72,13 +81,13 @@ function RouteSelection() {
           // scrollEnabled={false}
           region={region(candidateRoutes)}
         >
-          <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
+          <UrlTile urlTemplate={highContrast? DARK_TILE_URL: BASE_TILE_URL} shouldReplaceMapContent />
           {[safest, fastest].map(({ theme, route }, _) => (
             <Polyline
               key={route.token}
               coordinates={route.coordinateArray}
               strokeWidth={4}
-              strokeColor={theme.textColor}
+              strokeColor={highContrast? theme.darkStrokeColor: theme.baseStrokeColor}
               zIndex={theme.i}
             />
           ))}
@@ -119,7 +128,7 @@ function RouteSelection() {
                 const routeBorder = highContrast
                   ? "#444444"
                   : routeTheme.borderColor;
-                const routeTextColor = highContrast ? "#FFFFFF" : routeTheme.textColor;
+                const routeTextColor = highContrast ? "#FFFFFF" : routeTheme.baseStrokeColor;
                 return (
                   <TouchableOpacity
                     key={route.token}
@@ -134,7 +143,7 @@ function RouteSelection() {
                     ]}
                     onPress={() => {
                       setSelected(route)
-                      router.push('/(tabs)/trip-detail-sq')
+                      router.push('/(tabs)/trip-detail')
                     }}
                     accessibilityRole="button"
                     accessibilityLabel={routeTheme.label}

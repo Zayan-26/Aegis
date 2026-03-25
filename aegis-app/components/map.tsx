@@ -3,7 +3,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 import MapView, { LatLng, LongPressEvent, MapPressEvent, Marker, Region, UrlTile } from "react-native-maps";
 import BottomSheet, { BottomSheetFlatList } from "@gorhom/bottom-sheet";
 import { fetchNearbyPois, Poi, poiLabel } from "@/apis/request-poi";
-import { TILE_URL } from "@/apis/endpoints";
+import { BASE_TILE_URL, DARK_TILE_URL } from "@/apis/endpoints";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { RoutingProvider, useSafetyRoutes } from "@/contexts/RoutingContext";
 
@@ -127,7 +127,7 @@ export default function BrumMap({ poiSelectCallback }: BrumMapProps) {
         maxZoomLevel={19}
         showsPointsOfInterest={false}
       >
-        <UrlTile urlTemplate={TILE_URL} shouldReplaceMapContent />
+        <UrlTile urlTemplate={highContrast? DARK_TILE_URL: BASE_TILE_URL} shouldReplaceMapContent />
 
         {destinationM && !selectedPoi && (
           <Marker coordinate={destinationM.latlng} title={destinationM.title} pinColor="red" stopPropagation />

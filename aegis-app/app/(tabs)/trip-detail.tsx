@@ -1,339 +1,233 @@
-import BackBtn from "@/components/back-button";
-import { useAccessibility } from "@/contexts/AccessibilityContext";
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { router, useLocalSearchParams } from "expo-router";
-import { useMemo, useRef, useState } from "react";
-import {
-  StatusBar,
-  StyleSheet,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-const ROUTE_DATA: Record<
-  string,
-  {
-    label: string;
-    score: number | null;
-    time: string;
-    distance: string;
-    description: string;
-    color: string;
-    bgColor: string;
-  }
-> = {
-  safest: {
-    label: "Safest Route",
-    score: 92,
-    time: "24 min",
-    distance: "1.8 km",
-    description: "Well-lit streets, busy pedestrian area",
-    color: "#2D7D6F",
-    bgColor: "#F0FAF8",
-  },
-  fastest: {
-    label: "Fastest Route",
-    score: null,
-    time: "17 min",
-    distance: "1.2 km",
-    description: "Lower lighting in some sections",
-    color: "#C0392B",
-    bgColor: "#FFF5F5",
-  },
-};
+import { BASE_TILE_URL, DARK_TILE_URL } from "@/apis/endpoints"
+import BackBtn from "@/components/back-button"
+import { InternalRoutes } from "@/constants/routes"
+import { useAccessibility } from "@/contexts/AccessibilityContext"
+import { region, useSafetyRoutes } from "@/contexts/RoutingContext"
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet"
+import { router } from "expo-router"
+import { useMemo, useRef, useState } from "react"
+import { StyleSheet, TouchableOpacity, View, Text, Switch } from "react-native"
+import MapView, { UrlTile, Polyline } from "react-native-maps"
 
 function Avatar({ name, color }: { name: string; color: string }) {
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-  return (
-    <View style={[styles.avatar, { backgroundColor: color }]}>
-      <Text style={styles.avatarText}>{initials}</Text>
-    </View>
-  );
+    const initials = name
+        .split(" ")
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase();
+    return (
+        <View style={[styles.avatar, { backgroundColor: color }]}>
+            <Text style={styles.avatarText}>{initials}</Text>
+        </View>
+    );
 }
 
-export default function RouteDetailScreen() {
-  const { routeId, destination } = useLocalSearchParams<{
-    routeId: string;
-    destination: string;
-  }>();
 
-  const {
-    highContrast,
-    largeButtons,
-    trustedContacts,
-    notifyOn,
-    setNotifyOn,
-    theme,
-  } = useAccessibility();
-  const route = ROUTE_DATA[routeId ?? "safest"];
+function TripDetails() {
+    const { theme, highContrast, trustedContacts } = useAccessibility()
+    const { setSelected } = useSafetyRoutes()
+    // const { destination } = useSafetyRoutes()
+    const selected = InternalRoutes[0]
+    //PLACEHOLDER
+    const destination = "Lorem Ipsum"
+    const toggleContact = (id: string) => {
+        setSharedContacts((prev) => ({ ...prev, [id]: !prev[id] }));
+    };
 
-  const [sharedContacts, setSharedContacts] = useState<Record<string, boolean>>(
-    Object.fromEntries(trustedContacts.map((c) => [c.id, true])),
-  );
+    const sheetHeights = useMemo(() => ["15%", "50%", "95%"], []);
+    const routeBg = highContrast ? "#2A2A2A" : "#b7c9ff47";
+    const textColor = highContrast ? "#d0d003" : "#0e0efc"
+    const backBtn = () => {
+        setSelected(undefined)
+    }
+    const [sharedContacts, setSharedContacts] = useState<Record<string, boolean>>(
+        Object.fromEntries(trustedContacts.map((c) => [c.id, true])),
+    );
+    return (
 
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const sheetHeights = useMemo(() => ["15%", "50%", "88%"], []);
-
-  const routeColor = highContrast ? "#FFFFFF" : route.color;
-  const routeBg = highContrast ? "#2A2A2A" : route.bgColor;
-
-  const toggleContact = (id: string) => {
-    setSharedContacts((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  return (
-    <GestureHandlerRootView
-      style={{ flex: 1, backgroundColor: theme.screenBackground }}
-    >
-      <SafeAreaView
-        style={[styles.safe, { backgroundColor: theme.screenBackground }]}
-      >
-        <StatusBar
-          barStyle={highContrast ? "light-content" : "dark-content"}
-          backgroundColor={theme.screenBackground}
-        />
-
-        <View
-          style={[styles.topBar, { borderBottomColor: theme.boxBorderColor }]}
-        >
-          {/* <TouchableOpacity onPress={() => router.back()}>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "600",
-                color: theme.buttonColor,
-                fontFamily: theme.font,
-                letterSpacing: theme.letterSpacing,
-              }}
-            >
-              ← Back
-            </Text>
-          </TouchableOpacity> */}
-          <BackBtn />
-          <TouchableOpacity onPress={() => router.push("/profile")}>
-            <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View
-          style={[
-            styles.mapBox,
-            {
-              backgroundColor: theme.boxBackground,
-              borderColor: theme.boxBorderColor,
-            },
-          ]}
-        >
-          <Text style={styles.mapEmoji}>🗺️</Text>
-          <Text
-            style={[
-              styles.mapSubtitle,
-              {
-                color: theme.smallTextColor,
-                fontFamily: theme.font,
-                letterSpacing: theme.letterSpacing,
-              },
-            ]}
-          >
-            Live route will appear here
-          </Text>
-        </View>
-
-        <BottomSheet
-          ref={bottomSheetRef}
-          index={1}
-          snapPoints={sheetHeights}
-          backgroundStyle={{ backgroundColor: theme.boxBackground }}
-          handleIndicatorStyle={{
-            backgroundColor: theme.boxBorderColor,
-            width: 40,
-            height: 4,
-          }}
-        >
-          <BottomSheetScrollView
-            contentContainerStyle={styles.sheetContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={styles.routeTitleRow}>
-              <Text
-                style={[
-                  styles.routeTitle,
-                  {
-                    color: routeColor,
-                    fontSize: largeButtons ? 24 : 20,
-                    fontFamily: theme.font,
-                    letterSpacing: theme.letterSpacing,
-                  },
-                ]}
-              >
-                {route.label}
-              </Text>
-              <Text
-                style={[
-                  styles.routeDestination,
-                  {
-                    color: routeColor,
-                    fontFamily: theme.font,
-                    letterSpacing: theme.letterSpacing,
-                  },
-                ]}
-              >
-                {destination}
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.infoCard,
-                { backgroundColor: routeBg, borderColor: routeColor },
-              ]}
-            >
-              <View style={styles.infoCardTop}>
-                <View style={styles.infoCardLeft}>
-                  <Text
-                    style={[
-                      styles.infoScore,
-                      {
-                        color: routeColor,
-                        fontSize: theme.labelSize,
-                        fontFamily: theme.font,
-                        letterSpacing: theme.letterSpacing,
-                      },
-                    ]}
-                  >
-                    {route.score
-                      ? `Safety Score: ${route.score}`
-                      : "⚠️ Lower safety score"}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.infoDistance,
-                      {
-                        color: theme.smallTextColor,
-                        fontFamily: theme.font,
-                        letterSpacing: theme.letterSpacing,
-                      },
-                    ]}
-                  >
-                    📍 {route.distance}
-                  </Text>
-                  <Text
-                    style={[
-                      styles.infoDesc,
-                      {
-                        color: theme.smallTextColor,
-                        fontFamily: theme.font,
-                        letterSpacing: theme.letterSpacing,
-                        lineHeight: theme.lineH,
-                      },
-                    ]}
-                  >
-                    {route.description}
-                  </Text>
-                </View>
-                <Text
-                  style={[
-                    styles.infoTime,
-                    {
-                      color: routeColor,
-                      fontSize: largeButtons ? 22 : 18,
-                      fontFamily: theme.font,
-                      letterSpacing: theme.letterSpacing,
-                    },
-                  ]}
+        <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
+            <TouchableOpacity onPress={() => router.push("/profile")} style={styles.profileBtn}>
+                <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
+            </TouchableOpacity>
+            <BackBtn />
+            <View style={[styles.mapBox, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
+                <MapView
+                    style={{ flex: 1 }}
+                    mapType="none"
+                    showsPointsOfInterest={false}
+                    region={selected ? region([selected]) : undefined}
                 >
-                  {route.time}
-                </Text>
-              </View>
-            </View>
+                    <UrlTile urlTemplate={highContrast ? DARK_TILE_URL : BASE_TILE_URL} shouldReplaceMapContent />
 
-            <View
-              style={[
-                styles.card,
-                {
-                  backgroundColor: theme.boxBackground,
-                  borderColor: theme.boxBorderColor,
-                },
-              ]}
-            >
-              <View style={styles.cardHeader}>
-                <Text style={{ fontSize: 20 }}>👥</Text>
-                <Text
-                  style={[
-                    styles.cardTitle,
-                    {
-                      color: theme.mainTextColor,
-                      fontSize: theme.labelSize + 1,
-                      fontFamily: theme.font,
-                      letterSpacing: theme.letterSpacing,
-                    },
-                  ]}
-                >
-                  Share journey with trusted contacts
-                </Text>
-              </View>
-              {trustedContacts.length === 0 ? (
-                <Text
-                  style={[
-                    styles.noContactsText,
-                    {
-                      color: theme.smallTextColor,
-                      fontFamily: theme.font,
-                      letterSpacing: theme.letterSpacing,
-                    },
-                  ]}
-                >
-                  No trusted contacts added. Go back and add some.
-                </Text>
-              ) : (
-                trustedContacts.map((contact) => (
-                  <View
-                    key={contact.id}
-                    style={[
-                      styles.contactRow,
-                      { borderTopColor: theme.boxBorderColor },
-                    ]}
-                  >
-                    <Avatar
-                      name={contact.name}
-                      color={highContrast ? "#FFFFFF" : theme.buttonColor}
-                    />
-                    <Text
-                      style={[
-                        styles.contactName,
-                        {
-                          color: theme.mainTextColor,
-                          fontSize: theme.labelSize,
-                          fontFamily: theme.font,
-                          letterSpacing: theme.letterSpacing,
-                        },
-                      ]}
+                    {selected ? <Polyline
+                        key={selected.token}
+                        coordinates={selected.coordinateArray}
+                        strokeWidth={4}
+                        strokeColor={highContrast ? "#d0d003" : "#2e2efc"}
+                    /> : null}
+                </MapView>
+                <BottomSheet
+                    index={1}
+                    snapPoints={sheetHeights}
+                    backgroundStyle={{ backgroundColor: theme.boxBackground }}
+                    handleIndicatorStyle={{
+                        backgroundColor: theme.boxBorderColor,
+                        width: 40,
+                        height: 4,
+                    }}>
+                    <BottomSheetScrollView
+                        contentContainerStyle={styles.sheetContent}
+                        showsVerticalScrollIndicator={false}
                     >
-                      {contact.name}
-                    </Text>
-                    <Switch
-                      value={sharedContacts[contact.id] ?? true}
-                      onValueChange={() => toggleContact(contact.id)}
-                      trackColor={{
-                        false: highContrast ? "#555555" : "#D9DDE7",
-                        true: highContrast ? "#FFFFFF" : theme.buttonColor,
-                      }}
-                      thumbColor={highContrast ? "#000000" : "#FFFFFF"}
-                      ios_backgroundColor={highContrast ? "#555555" : "#D9DDE7"}
-                    />
-                  </View>
-                ))
-              )}
-            </View>
+                        <View style={styles.routeTitleRow}>
+                            <Text
+                                style={[
+                                    styles.routeDestination,
+                                    {
+                                        fontFamily: theme.font,
+                                        letterSpacing: theme.letterSpacing,
+                                        fontSize: 24,
+                                        color: textColor
+                                    },
+                                ]}
+                            >
+                                {destination}
+                            </Text>
+                        </View>
+                        {/* ------------------------------- */}
+                        <View
+                            style={[
+                                styles.infoCard,
+                                { backgroundColor: routeBg },
+                            ]}
+                        >
+                            <View style={styles.infoCardTop}>
+                                <View style={styles.infoCardLeft}>
+                                    <Text
+                                        style={{
+                                            fontSize: theme.labelSize,
+                                            fontFamily: theme.font,
+                                            letterSpacing: theme.letterSpacing,
+                                            fontWeight: 700,
+                                            color: textColor
+                                        }}
+                                    >
+                                        Safety Score: {selected.safetyScore}
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.infoDistance,
+                                            {
+                                                color: theme.smallTextColor,
+                                                fontFamily: theme.font,
+                                                letterSpacing: theme.letterSpacing,
+                                            },
+                                        ]}
+                                    >
+                                        📍 {selected.distance > 1000 ? `${~~(selected.distance / 1000)} km` : `${selected.distance} metres`}
+                                    </Text>
+                                </View>
+                                <Text
+                                    style={[
+                                        styles.infoTime,
+                                        {
+                                            fontSize: theme.btnRadius + 2,
+                                            fontFamily: theme.font,
+                                            letterSpacing: theme.letterSpacing,
+                                            color: textColor
+                                        },
+                                    ]}
+                                >
+                                    {
+                                        ~~(selected.duration / 60) > 0 ? ` ${~~(selected.duration / 60)} Hr ` : ''
+                                    }
+                                    {
+                                        selected.duration % 60 > 0 ? `${selected.duration % 60} Mins` : ''
+                                    }
+                                </Text>
+                            </View>
+                        </View>
+
+                        <View
+                            style={[
+                                styles.card,
+                                {
+                                    backgroundColor: routeBg,
+                                    borderColor: theme.boxBorderColor,
+                                },
+                            ]}
+                        >
+                            <View style={styles.cardHeader}>
+                                <Text style={{ fontSize: 20 }}>👥</Text>
+                                <Text
+                                    style={[
+                                        styles.cardTitle,
+                                        {
+                                            color: theme.mainTextColor,
+                                            fontSize: theme.labelSize + 1,
+                                            fontFamily: theme.font,
+                                            letterSpacing: theme.letterSpacing,
+                                        },
+                                    ]}
+                                >
+                                    Share journey with trusted contacts
+                                </Text>
+                            </View>
+                            {trustedContacts.length === 0 ? (
+                                <Text
+                                    style={[
+                                        styles.noContactsText,
+                                        {
+                                            color: theme.smallTextColor,
+                                            fontFamily: theme.font,
+                                            letterSpacing: theme.letterSpacing,
+                                        },
+                                    ]}
+                                >
+                                    No trusted contacts added. Go back and add some.
+                                </Text>
+                            ) : (
+                                trustedContacts.map((contact) => (
+                                    <View
+                                        key={contact.id}
+                                        style={[
+                                            styles.contactRow,
+                                            { borderTopColor: theme.boxBorderColor },
+                                        ]}
+                                    >
+                                        <Avatar
+                                            name={contact.name}
+                                            color={highContrast ? "#FFFFFF" : theme.buttonColor}
+                                        />
+                                        <Text
+                                            style={[
+                                                styles.contactName,
+                                                {
+                                                    color: theme.mainTextColor,
+                                                    fontSize: theme.labelSize,
+                                                    fontFamily: theme.font,
+                                                    letterSpacing: theme.letterSpacing,
+                                                },
+                                            ]}
+                                        >
+                                            {contact.name}
+                                        </Text>
+                                        <Switch
+                                            value={sharedContacts[contact.id] ?? true}
+                                            onValueChange={() => toggleContact(contact.id)}
+                                            trackColor={{
+                                                false: highContrast ? "#555555" : "#D9DDE7",
+                                                true: highContrast ? "#FFFFFF" : theme.buttonColor,
+                                            }}
+                                            thumbColor={highContrast ? "#000000" : "#FFFFFF"}
+                                            ios_backgroundColor={highContrast ? "#555555" : "#D9DDE7"}
+                                        />
+                                    </View>
+                                ))
+                            )}
+                        </View>
+                        {/* </View>
 
             <View
               style={[
@@ -384,110 +278,119 @@ export default function RouteDetailScreen() {
                   Your companions will be notified when your journey starts.
                 </Text>
               )}
-            </View>
+                        </View>
+                        {*/}
 
-            <TouchableOpacity
-              style={[
-                styles.startBtn,
-                {
-                  backgroundColor: theme.buttonColor,
-                  paddingVertical: theme.btnPadding,
-                  borderRadius: theme.btnRadius,
-                },
-              ]}
-              accessibilityRole="button"
-              accessibilityLabel="Start Navigation"
-            >
-              <Text
-                style={[
-                  styles.startBtnText,
-                  {
-                    color: theme.buttonTextColor,
-                    fontSize: theme.btnTextSize,
-                    fontFamily: theme.font,
-                    letterSpacing: theme.letterSpacing,
-                  },
-                ]}
-              >
-                Start Navigation
-              </Text>
-            </TouchableOpacity>
-          </BottomSheetScrollView>
-        </BottomSheet>
-      </SafeAreaView>
-    </GestureHandlerRootView>
-  );
+                        <TouchableOpacity
+                            style={[
+                                styles.startBtn,
+                                {
+                                    backgroundColor: theme.buttonColor,
+                                    paddingVertical: theme.btnPadding,
+                                    borderRadius: theme.btnRadius,
+                                },
+                            ]}
+                            accessibilityRole="button"
+                            accessibilityLabel="Start Navigation"
+                        >
+                            <Text
+                                style={[
+                                    styles.startBtnText,
+                                    {
+                                        color: theme.buttonTextColor,
+                                        fontSize: theme.btnTextSize,
+                                        fontFamily: theme.font,
+                                        letterSpacing: theme.letterSpacing,
+                                    },
+                                ]}
+                            >
+                                Start Navigation
+                            </Text>
+                        </TouchableOpacity>
+                        {/* ------------------------- */}
+                    </BottomSheetScrollView>
+
+                </BottomSheet>
+            </View>
+        </View>
+    )
 }
 
+export default TripDetails
+
 const styles = StyleSheet.create({
-  safe: { flex: 1 },
-  topBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  mapBox: {
-    flex: 1,
-    margin: 16,
-    marginBottom: 0,
-    borderRadius: 20,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    padding: 24,
-  },
-  mapEmoji: { fontSize: 48 },
-  mapSubtitle: { fontSize: 12, textAlign: "center" },
-  sheetContent: {
-    paddingHorizontal: 20,
-    paddingTop: 8,
-    paddingBottom: 48,
-    gap: 12,
-  },
-  routeTitleRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  routeTitle: { fontWeight: "700" },
-  routeDestination: {
-    fontSize: 13,
-    fontWeight: "500",
-    opacity: 0.7,
-    flex: 1,
-    textAlign: "right",
-  },
-  infoCard: { borderRadius: 16, borderWidth: 1.5, padding: 14 },
-  infoCardTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-  },
-  infoCardLeft: { flex: 1, gap: 4 },
-  infoScore: { fontWeight: "700" },
-  infoDistance: { fontSize: 13 },
-  infoDesc: { fontSize: 13 },
-  infoTime: { fontWeight: "700", marginLeft: 12 },
-  card: { borderRadius: 16, borderWidth: 1, padding: 14, gap: 10 },
-  cardHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
-  cardTitle: { fontWeight: "700", flex: 1 },
-  contactRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingTop: 10,
-    borderTopWidth: 1,
-  },
-  avatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarText: { color: "#FFFFFF", fontSize: 13, fontWeight: "700" },
-  contactName: { flex: 1, fontWeight: "500" },
-  noContactsText: { fontSize: 14, textAlign: "center", paddingVertical: 8 },
-  startBtn: { width: "100%", alignItems: "center", marginTop: 4 },
-  startBtnText: { fontWeight: "700" },
-});
+    container: {
+        flex: 1,
+        paddingHorizontal: 24,
+        paddingTop: 24,
+        gap: 16,
+    },
+    profileBtn: {
+        position: "absolute",
+        top: 20,
+        right: 24
+    },
+    mapBox: {
+        flex: 1,
+        borderRadius: 20,
+        borderWidth: 1,
+        overflow: "hidden",
+        alignItems: "stretch",
+        justifyContent: "flex-start",
+        marginVertical: 26
+    },
+    sheetBg: {
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 10,
+    },
+    sheetContent: {
+        paddingHorizontal: 20,
+        paddingTop: 8,
+        paddingBottom: 40,
+        gap: 10,
+    },
+    routeDestination: {
+        fontWeight: "500",
+        flex: 1,
+        textAlign: "center",
+    },
+    routeTitleRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+    infoCard: { borderRadius: 16, borderWidth: 1.5, padding: 14 },
+    infoCardTop: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+    },
+    infoCardLeft: { flex: 1, gap: 4 },
+    infoScore: { fontWeight: "700" },
+    infoDistance: { fontSize: 13 },
+    infoDesc: { fontSize: 13 },
+    infoTime: { fontWeight: "700", marginLeft: 12 },
+    card: { borderRadius: 16, borderWidth: 1, padding: 14, gap: 10 },
+    cardHeader: { flexDirection: "row", alignItems: "center", gap: 8 },
+    cardTitle: { fontWeight: "700", flex: 1 },
+    contactRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        paddingTop: 10,
+        borderTopWidth: 1,
+    },
+    avatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    avatarText: { color: "#FFFFFF", fontSize: 13, fontWeight: "700" },
+    contactName: { flex: 1, fontWeight: "500" },
+    noContactsText: { fontSize: 14, textAlign: "center", paddingVertical: 8 },
+    startBtn: { width: "100%", alignItems: "center", marginTop: 4 },
+    startBtnText: { fontWeight: "700" },
+})
