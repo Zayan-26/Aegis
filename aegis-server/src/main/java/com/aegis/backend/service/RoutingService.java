@@ -29,7 +29,7 @@ public class RoutingService {
         hopper.setGraphHopperLocation("target/routing-graph-cache");
         
         // graphhopper set up
-        hopper.setEncodedValuesString("foot_access, foot_average_speed, foot_priority");
+        hopper.setEncodedValuesString("foot_access, foot_average_speed, foot_priority, hike_rating");
         hopper.setProfiles(new Profile("foot").setCustomModel(GHUtility.loadCustomModelFromJar("foot.json")));
         
         // process map

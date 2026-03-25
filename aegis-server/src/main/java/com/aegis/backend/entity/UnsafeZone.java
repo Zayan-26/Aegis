@@ -1,5 +1,6 @@
 package com.aegis.backend.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -7,23 +8,31 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Data;
 
-@Data // Lombok creats get methods automatically
+@Data
 @Entity
-@Table(name = "05_unsafe_zones") // link to table
+@Table(name = "unsafe_zones")
 public class UnsafeZone {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "unsafe_zone_id") 
     private Long id;
 
+    @Column(name = "zone_name") 
     private String zoneName; 
 
-    // Zone that GraphHopper will avoid
+    @Column(name = "min_lat")
     private double minLat;
+
+    @Column(name = "min_lon")
     private double minLon;
+
+    @Column(name = "max_lat")
     private double maxLat;
+
+    @Column(name = "max_lon")
     private double maxLon;
 
-    // Safety multiplier
+    @Column(name = "safety_multiplier")
     private double safetyMultiplier; 
 }
