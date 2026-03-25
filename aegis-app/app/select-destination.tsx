@@ -14,7 +14,6 @@ import BrumMap from "@/components/map";
 import { Poi } from "@/apis/request-poi";
 import { fetchRoutes } from "@/apis/request-route";
 import { LatLng } from "react-native-maps";
-<<<<<<<< HEAD:aegis-app/app/select-destination.tsx
 import { useAegisRouting } from "@/contexts/RoutingContext"
 import * as Location from "expo-location"
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,34 +35,6 @@ export default function SelectDestination() {
   const { highContrast, theme } = useAccessibility();
   const [destination, setDestination] = useState<Poi | null>(null);
   const { token } = useAuth()
-========
-import { useSafetyRoutes } from "@/contexts/RoutingContext"
-import * as Location from "expo-location"
-
-const selectRoute = async (destination: LatLng) => {
-  let {status} = await Location.requestForegroundPermissionsAsync()
-  if(status != 'granted') throw Error("Permission Denied.")
-  // GetLocation.getCurrentPosition({
-  //   enableHighAccuracy: true,
-  //   timeout: 60000
-  // }).then(async source => {
-  //   const routes = await fetchRoutes(source, destination)
-  //   const { setCandidateRoutes } = useSafetyRoutes();
-  //   setCandidateRoutes(routes)
-  //   router.push("/select-route")
-  // })
-  Location.getLastKnownPositionAsync().then(async source => {
-    const routes = await fetchRoutes({latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0}, destination)
-    const { setCandidateRoutes } = useSafetyRoutes();
-    setCandidateRoutes(routes)
-    router.push("/select-route")
-  })
-};
-
-export default function ExploreScreen() {
-  const { highContrast, largeButtons, theme } = useAccessibility();
-  const [destination, setDestination] = useState<Poi | null>(null);
->>>>>>>> 825acf0 (Deleted sample app file as it was constantly getting in my way, refactored back button out and removed redundant back buttons scattered everywhere in order to ensure consistency of button rendering, as well as changes to the component.):aegis-app/app/(tabs)/select-destination.tsx
 
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
@@ -180,11 +151,7 @@ export default function ExploreScreen() {
             },
           ]}
           // onPress={() => router.push({ pathname: "/select-route"})}
-<<<<<<<< HEAD:aegis-app/app/select-destination.tsx
           onPress={async () => await selectRoute({ latitude: destination?.poi_lat ?? 0, longitude: destination?.poi_lng ?? 0 }, token)}
-========
-          onPress={async () => await selectRoute({latitude: destination?.poi_lat ?? 0, longitude: destination?.poi_lng ?? 0})}
->>>>>>>> 825acf0 (Deleted sample app file as it was constantly getting in my way, refactored back button out and removed redundant back buttons scattered everywhere in order to ensure consistency of button rendering, as well as changes to the component.):aegis-app/app/(tabs)/select-destination.tsx
           disabled={destination == null}
           accessibilityRole="button"
           accessibilityLabel="Start Journey"

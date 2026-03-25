@@ -1,8 +1,9 @@
+// app/route-detail.tsx
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { router, useLocalSearchParams } from "expo-router";
 import { useMemo, useRef, useState } from "react";
 import {
-  // SafeAreaView,
+  SafeAreaView,
   StatusBar,
   StyleSheet,
   Switch,
@@ -11,9 +12,7 @@ import {
   View,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useAccessibility } from "@/contexts/AccessibilityContext";
-import { SafeAreaView } from 'react-native-safe-area-context'
-import BackBtn from "@/components/back-button";
+import { useAccessibility } from "./AccessibilityContext";
 
 const ROUTE_DATA: Record<
   string,
@@ -23,6 +22,7 @@ const ROUTE_DATA: Record<
     time: string;
     distance: string;
     description: string;
+    icon: string;
     color: string;
     bgColor: string;
   }
@@ -66,10 +66,16 @@ export default function RouteDetailScreen() {
     routeId: string;
     destination: string;
   }>();
-
-  const { highContrast, largeButtons, trustedContacts, notifyOn, setNotifyOn, theme } = useAccessibility();
+  const {
+    dyslexic,
+    colorBlind,
+    highContrast,
+    largeButtons,
+    trustedContacts,
+    notifyOn,
+    setNotifyOn,
+  } = useAccessibility();
   const route = ROUTE_DATA[routeId ?? "safest"];
-
   const [sharedContacts, setSharedContacts] = useState<Record<string, boolean>>(
     Object.fromEntries(trustedContacts.map((c) => [c.id, true])),
   );
@@ -77,6 +83,20 @@ export default function RouteDetailScreen() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["15%", "50%", "88%"], []);
 
+  const screenBackground = highContrast ? "#000000" : "#F7F8FC";
+  const boxBackground = highContrast ? "#1A1A1A" : "#FFFFFF";
+  const mainTextColor = highContrast ? "#FFFFFF" : "#1E2A78";
+  const smallTextColor = highContrast ? "#CCCCCC" : "#4F647A";
+  const boxBorderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
+  const buttonColor = colorBlind ? "#E69F00" : "#69B7C6";
+  const buttonTextColor = colorBlind ? "#000000" : "#FFFFFF";
+  const font = dyslexic ? "OpenDyslexic" : undefined;
+  const letterSpacing = dyslexic ? 1 : 0;
+  const lineH = dyslexic ? 24 : 20;
+  const btnPadding = largeButtons ? 22 : 16;
+  const btnRadius = largeButtons ? 20 : 16;
+  const btnTextSize = largeButtons ? 20 : 17;
+  const labelSize = largeButtons ? 17 : 15;
   const routeColor = highContrast ? "#FFFFFF" : route.color;
   const routeBg = highContrast ? "#2A2A2A" : route.bgColor;
 
@@ -85,41 +105,49 @@ export default function RouteDetailScreen() {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.screenBackground }}>
-      <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
+    <GestureHandlerRootView
+      style={{ flex: 1, backgroundColor: screenBackground }}
+    >
+      <SafeAreaView
+        style={[styles.safe, { backgroundColor: screenBackground }]}
+      >
         <StatusBar
           barStyle={highContrast ? "light-content" : "dark-content"}
-          backgroundColor={theme.screenBackground}
+          backgroundColor={screenBackground}
         />
 
         {/* Top bar */}
-        <View style={[styles.topBar, { borderBottomColor: theme.boxBorderColor }]}>
-          {/* <TouchableOpacity onPress={() => router.back()}>
+        <View style={[styles.topBar, { borderBottomColor: boxBorderColor }]}>
+          <TouchableOpacity onPress={() => router.back()}>
             <Text
               style={{
                 fontSize: 16,
                 fontWeight: "600",
-                color: theme.buttonColor,
-                fontFamily: theme.font,
-                letterSpacing: theme.letterSpacing,
+                color: buttonColor,
+                fontFamily: font,
+                letterSpacing,
               }}
             >
-              ← Back
+              {"← Back"}
             </Text>
-          </TouchableOpacity> */}
-          <BackBtn/>
+          </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push("/profile")}>
-            <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
+            <Text style={{ fontSize: 24, color: mainTextColor }}>{"☰"}</Text>
           </TouchableOpacity>
         </View>
 
         {/* Map placeholder */}
-        <View style={[styles.mapBox, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
-          <Text style={styles.mapEmoji}>🗺️</Text>
+        <View
+          style={[
+            styles.mapBox,
+            { backgroundColor: boxBackground, borderColor: boxBorderColor },
+          ]}
+        >
+          <Text style={styles.mapEmoji}>{"🗺️"}</Text>
           <Text
             style={[
               styles.mapSubtitle,
-              { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+              { color: smallTextColor, fontFamily: font, letterSpacing },
             ]}
           >
             Live route will appear here
@@ -131,14 +159,17 @@ export default function RouteDetailScreen() {
           ref={bottomSheetRef}
           index={1}
           snapPoints={snapPoints}
-          backgroundStyle={{ backgroundColor: theme.boxBackground }}
+          backgroundStyle={{ backgroundColor: boxBackground }}
           handleIndicatorStyle={{
-            backgroundColor: theme.boxBorderColor,
+            backgroundColor: boxBorderColor,
             width: 40,
             height: 4,
           }}
         >
-          <BottomSheetScrollView contentContainerStyle={styles.sheetContent} showsVerticalScrollIndicator={false}>
+          <BottomSheetScrollView
+            contentContainerStyle={styles.sheetContent}
+            showsVerticalScrollIndicator={false}
+          >
             {/* Route title + destination */}
             <View style={styles.routeTitleRow}>
               <Text
@@ -147,8 +178,8 @@ export default function RouteDetailScreen() {
                   {
                     color: routeColor,
                     fontSize: largeButtons ? 24 : 20,
-                    fontFamily: theme.font,
-                    letterSpacing: theme.letterSpacing,
+                    fontFamily: font,
+                    letterSpacing,
                   },
                 ]}
               >
@@ -157,7 +188,7 @@ export default function RouteDetailScreen() {
               <Text
                 style={[
                   styles.routeDestination,
-                  { color: routeColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+                  { color: routeColor, fontFamily: font, letterSpacing },
                 ]}
               >
                 {destination}
@@ -165,7 +196,12 @@ export default function RouteDetailScreen() {
             </View>
 
             {/* Route info card */}
-            <View style={[styles.infoCard, { backgroundColor: routeBg, borderColor: routeColor }]}>
+            <View
+              style={[
+                styles.infoCard,
+                { backgroundColor: routeBg, borderColor: routeColor },
+              ]}
+            >
               <View style={styles.infoCardTop}>
                 <View style={styles.infoCardLeft}>
                   <Text
@@ -173,30 +209,37 @@ export default function RouteDetailScreen() {
                       styles.infoScore,
                       {
                         color: routeColor,
-                        fontSize: theme.labelSize,
-                        fontFamily: theme.font,
-                        letterSpacing: theme.letterSpacing,
+                        fontSize: labelSize,
+                        fontFamily: font,
+                        letterSpacing,
                       },
                     ]}
                   >
-                    {route.score ? `Safety Score: ${route.score}` : "⚠️ Lower safety score"}
+                    {route.score
+                      ? `Safety Score: ${route.score}`
+                      : "⚠️ Lower safety score"}
                   </Text>
                   <Text
                     style={[
                       styles.infoDistance,
-                      { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+                      {
+                        color: smallTextColor,
+                        fontFamily: font,
+                        letterSpacing,
+                      },
                     ]}
                   >
-                    📍 {route.distance}
+                    {"📍 "}
+                    {route.distance}
                   </Text>
                   <Text
                     style={[
                       styles.infoDesc,
                       {
-                        color: theme.smallTextColor,
-                        fontFamily: theme.font,
-                        letterSpacing: theme.letterSpacing,
-                        lineHeight: theme.lineH,
+                        color: smallTextColor,
+                        fontFamily: font,
+                        letterSpacing,
+                        lineHeight: lineH,
                       },
                     ]}
                   >
@@ -209,8 +252,8 @@ export default function RouteDetailScreen() {
                     {
                       color: routeColor,
                       fontSize: largeButtons ? 22 : 18,
-                      fontFamily: theme.font,
-                      letterSpacing: theme.letterSpacing,
+                      fontFamily: font,
+                      letterSpacing,
                     },
                   ]}
                 >
@@ -220,17 +263,22 @@ export default function RouteDetailScreen() {
             </View>
 
             {/* Share with trusted contacts */}
-            <View style={[styles.card, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: boxBackground, borderColor: boxBorderColor },
+              ]}
+            >
               <View style={styles.cardHeader}>
-                <Text style={{ fontSize: 20 }}>👥</Text>
+                <Text style={{ fontSize: 20 }}>{"👥"}</Text>
                 <Text
                   style={[
                     styles.cardTitle,
                     {
-                      color: theme.mainTextColor,
-                      fontSize: theme.labelSize + 1,
-                      fontFamily: theme.font,
-                      letterSpacing: theme.letterSpacing,
+                      color: mainTextColor,
+                      fontSize: labelSize + 1,
+                      fontFamily: font,
+                      letterSpacing,
                     },
                   ]}
                 >
@@ -241,23 +289,32 @@ export default function RouteDetailScreen() {
                 <Text
                   style={[
                     styles.noContactsText,
-                    { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
+                    { color: smallTextColor, fontFamily: font, letterSpacing },
                   ]}
                 >
                   No trusted contacts added. Go back and add some.
                 </Text>
               ) : (
                 trustedContacts.map((contact) => (
-                  <View key={contact.id} style={[styles.contactRow, { borderTopColor: theme.boxBorderColor }]}>
-                    <Avatar name={contact.name} color={highContrast ? "#FFFFFF" : theme.buttonColor} />
+                  <View
+                    key={contact.id}
+                    style={[
+                      styles.contactRow,
+                      { borderTopColor: boxBorderColor },
+                    ]}
+                  >
+                    <Avatar
+                      name={contact.name}
+                      color={highContrast ? "#FFFFFF" : buttonColor}
+                    />
                     <Text
                       style={[
                         styles.contactName,
                         {
-                          color: theme.mainTextColor,
-                          fontSize: theme.labelSize,
-                          fontFamily: theme.font,
-                          letterSpacing: theme.letterSpacing,
+                          color: mainTextColor,
+                          fontSize: labelSize,
+                          fontFamily: font,
+                          letterSpacing,
                         },
                       ]}
                     >
@@ -268,7 +325,7 @@ export default function RouteDetailScreen() {
                       onValueChange={() => toggleContact(contact.id)}
                       trackColor={{
                         false: highContrast ? "#555555" : "#D9DDE7",
-                        true: highContrast ? "#FFFFFF" : theme.buttonColor,
+                        true: highContrast ? "#FFFFFF" : buttonColor,
                       }}
                       thumbColor={highContrast ? "#000000" : "#FFFFFF"}
                       ios_backgroundColor={highContrast ? "#555555" : "#D9DDE7"}
@@ -279,16 +336,21 @@ export default function RouteDetailScreen() {
             </View>
 
             {/* Notification toggle */}
-            <View style={[styles.card, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: boxBackground, borderColor: boxBorderColor },
+              ]}
+            >
               <View style={styles.cardHeader}>
                 <Text
                   style={[
                     styles.cardTitle,
                     {
-                      color: theme.mainTextColor,
-                      fontSize: theme.labelSize + 1,
-                      fontFamily: theme.font,
-                      letterSpacing: theme.letterSpacing,
+                      color: mainTextColor,
+                      fontSize: labelSize + 1,
+                      fontFamily: font,
+                      letterSpacing,
                     },
                   ]}
                 >
@@ -299,7 +361,7 @@ export default function RouteDetailScreen() {
                   onValueChange={setNotifyOn}
                   trackColor={{
                     false: highContrast ? "#555555" : "#D9DDE7",
-                    true: highContrast ? "#FFFFFF" : theme.buttonColor,
+                    true: highContrast ? "#FFFFFF" : buttonColor,
                   }}
                   thumbColor={highContrast ? "#000000" : "#FFFFFF"}
                   ios_backgroundColor={highContrast ? "#555555" : "#D9DDE7"}
@@ -310,10 +372,10 @@ export default function RouteDetailScreen() {
                   style={[
                     styles.noContactsText,
                     {
-                      color: theme.smallTextColor,
-                      fontFamily: theme.font,
-                      letterSpacing: theme.letterSpacing,
-                      lineHeight: theme.lineH,
+                      color: smallTextColor,
+                      fontFamily: font,
+                      letterSpacing,
+                      lineHeight: lineH,
                     },
                   ]}
                 >
@@ -321,15 +383,14 @@ export default function RouteDetailScreen() {
                 </Text>
               )}
             </View>
-
             {/* Start Navigation */}
             <TouchableOpacity
               style={[
                 styles.startBtn,
                 {
-                  backgroundColor: theme.buttonColor,
-                  paddingVertical: theme.btnPadding,
-                  borderRadius: theme.btnRadius,
+                  backgroundColor: buttonColor,
+                  paddingVertical: btnPadding,
+                  borderRadius: btnRadius,
                 },
               ]}
               accessibilityRole="button"
@@ -339,10 +400,10 @@ export default function RouteDetailScreen() {
                 style={[
                   styles.startBtnText,
                   {
-                    color: theme.buttonTextColor,
-                    fontSize: theme.btnTextSize,
-                    fontFamily: theme.font,
-                    letterSpacing: theme.letterSpacing,
+                    color: buttonTextColor,
+                    fontSize: btnTextSize,
+                    fontFamily: font,
+                    letterSpacing,
                   },
                 ]}
               >

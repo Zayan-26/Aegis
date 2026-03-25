@@ -1,4 +1,4 @@
-import { TRIP_ENDPOINT } from "./endpoints";
+import { TRIP_ENDPOINT } from "/constants/endpoints";
 import SecureStore from "expo-secure-store"
 
 export async function initiateTrip(routeID: number, companions: number[]){
