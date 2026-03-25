@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,6 +23,7 @@ import com.graphhopper.util.PointList;
 
 @RestController
 @RequestMapping("/api/routes")
+@CrossOrigin(origins = "*")
 public class RouteController {
 
     @Autowired
@@ -33,7 +35,7 @@ public class RouteController {
     @Autowired
     private RouteCache routeCache;
 
-    @GetMapping("/calculate")
+    @GetMapping(value = "/calculate", produces = "application/json")
     public ResponseEntity<?> calculateRoute(
             @RequestParam double startLat,
             @RequestParam double startLon,
