@@ -63,7 +63,6 @@ function Navigation() {
         if (getDistance({ longitude: location?.coords.longitude, latitude: location?.coords.latitude }, { longitude: currentNN.coordinates.longitude, latitude: currentNN.coordinates.latitude }) < 2) {
             Step()
         }
-        // TODO: re-enable once sockets are done
         if (token) if (location) locationUpdate(token, location.coords, socket)
         else throw Error("Location not found.")
         else throw Error("User Token doesn't exist.")

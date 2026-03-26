@@ -34,15 +34,16 @@ const RouteConstants = {
 }
 function RouteSelection() {
   const { theme, highContrast } = useAccessibility();
-  const { destination, setSelected, setCandidateRoutes, setDestination} = useAegisRouting()
+  const { candidateRoutes, destination, setSelected, setCandidateRoutes, setDestination } = useAegisRouting()
   //Internal Routes are placeholders, just uncomment the next line and comment the next one out / delete the next one.
-  const candidateRoutes = InternalRoutes
+  // const candidateRoutes = InternalRoutes
   //Hook this on once we stop using internal routes.
   const backBtnPressed = () => {
     setSelected(undefined)
     setCandidateRoutes([])
     setDestination(undefined)
   }
+  var a = 0
   type ThemeRoutePair = {
     theme: {
       label: string
@@ -50,7 +51,7 @@ function RouteSelection() {
       bgColor: string,
       baseStrokeColor: string,
       darkStrokeColor: string
-      i : number
+      i: number
     },
     route: SafetyRoute
   }
@@ -63,8 +64,8 @@ function RouteSelection() {
     theme: RouteConstants.fastest,
     route: candidateRoutes.sort((a, b) => a.duration - b.duration)[0],
   }
-
-
+  var rrt = [safest]
+  if (safest.route.token != fastest.route.token) rrt.push(fastest)
   return (
     <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
       {/* <StatusBar backgroundColor={theme.screenBackground} /> */}
@@ -81,16 +82,17 @@ function RouteSelection() {
           // scrollEnabled={false}
           region={region(candidateRoutes)}
         >
-          <UrlTile urlTemplate={highContrast? DARK_TILE_URL: BASE_TILE_URL} shouldReplaceMapContent />
-          {[safest, fastest].map(({ theme, route }, _) => (
-            <Polyline
-              key={route.token}
-              coordinates={route.coordinateArray}
-              strokeWidth={4}
-              strokeColor={highContrast? theme.darkStrokeColor: theme.baseStrokeColor}
-              zIndex={theme.i}
-            />
-          ))}
+          <UrlTile urlTemplate={highContrast ? DARK_TILE_URL : BASE_TILE_URL} shouldReplaceMapContent />
+          {
+            rrt.map(({ theme, route }, _) => (
+              <Polyline
+                key={route.token}
+                coordinates={route.coordinateArray}
+                strokeWidth={4}
+                strokeColor={highContrast ? theme.darkStrokeColor : theme.baseStrokeColor}
+                zIndex={theme.i}
+              />
+            ))}
         </MapView>
         <BottomSheet
           index={1}
@@ -121,7 +123,7 @@ function RouteSelection() {
               </Text>
             </View>
             {
-              [safest, fastest].map(({ theme: routeTheme, route }, _) => {
+              rrt.map(({ theme: routeTheme, route }, _) => {
                 const routeBg = highContrast
                   ? "#1A1A1A"
                   : routeTheme.bgColor;
@@ -129,6 +131,10 @@ function RouteSelection() {
                   ? "#444444"
                   : routeTheme.borderColor;
                 const routeTextColor = highContrast ? "#FFFFFF" : routeTheme.baseStrokeColor;
+                // if(safest == fastest){
+                //   if(a == 0) a++
+                //   else return undefined
+                // }
                 return (
                   <TouchableOpacity
                     key={route.token}

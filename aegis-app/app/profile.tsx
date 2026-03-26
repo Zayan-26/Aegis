@@ -17,7 +17,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { logout } from "@/apis/authentication";
 
 export default function ProfileScreen() {
-  const { token } = useAuth()
+  const { token, displayName } = useAuth()
   const {
     highContrast,
     largeButtons,
@@ -182,7 +182,7 @@ export default function ProfileScreen() {
                 },
               ]}
             >
-              Grace
+              {displayName}
             </Text>
             <Text
               style={[

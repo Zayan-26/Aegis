@@ -14,10 +14,10 @@ type DestinationMarker = {
 };
 
 const INITIAL_REGION: Region = {
-  latitude: 52.4778995,
-  longitude: -1.900092,
-  latitudeDelta: 0.02,
-  longitudeDelta: 0.02,
+  latitude: 52.451001,
+  longitude: -1.9236165,
+  latitudeDelta: 0.01,
+  longitudeDelta: 0.01,
 };
 
 type BrumMapProps = {

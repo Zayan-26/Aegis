@@ -29,12 +29,9 @@ function Avatar({ name, color }: { name: string; color: string }) {
 
 function TripDetails() {
     const { theme, highContrast, trustedContacts } = useAccessibility()
-    const { setSelected, setNavigation } = useAegisRouting()
+    const { setSelected, setNavigation, destination, selected } = useAegisRouting()
     const { token } = useAuth()
-    // const { destination } = useSafetyRoutes()
-    const selected = InternalRoutes[0]
-    //PLACEHOLDER
-    const destination = "Lorem Ipsum"
+    if(!selected) return
     const toggleContact = (id: string) => {
         setSharedContacts((prev) => ({ ...prev, [id]: !prev[id] }));
     };

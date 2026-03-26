@@ -18,36 +18,34 @@ import { useAegisRouting } from "@/contexts/RoutingContext"
 import * as Location from "expo-location"
 import { useAuth } from "@/contexts/AuthContext";
 
-const selectRoute = async (destination: LatLng, token: string | null) => {
-  let { status } = await Location.requestForegroundPermissionsAsync()
-  if (status != 'granted') throw Error("Permission Denied.")
-  if (!token) throw Error("Not logged in. How are you here?")
-
-  Location.getLastKnownPositionAsync().then(async source => {
-    const routes = await fetchRoutes({ latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0 }, destination, token)
-    const { setCandidateRoutes } = useAegisRouting();
-    setCandidateRoutes(routes)
-    router.push("/select-route")
-  })
-};
 
 export default function SelectDestination() {
   const { highContrast, theme } = useAccessibility();
   const [destination, setDestination] = useState<Poi | null>(null);
-  const { token } = useAuth()
-
+  const { setCandidateRoutes } = useAegisRouting();
+  const selectRoute = async (destination: LatLng) => {
+    let { status } = await Location.requestForegroundPermissionsAsync()
+    if (status != 'granted') throw Error("Permission Denied.")
+  
+    Location.getLastKnownPositionAsync().then(async source => {
+      const routes = await fetchRoutes({ latitude: source?.coords.latitude ?? 0, longitude: source?.coords.longitude ?? 0 }, destination)
+      setCandidateRoutes(routes)
+      router.push("/select-route")
+    })
+  };
+  
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
       <StatusBar
         barStyle={highContrast ? "light-content" : "dark-content"}
         backgroundColor={theme.screenBackground}
-      />
+        />
 
       <View style={styles.container}>
         <TouchableOpacity
           onPress={() => router.push("/profile")}
           style={{ position: "absolute", top: 20, right: 24 }}
-        >
+          >
           <Text style={{ fontSize: 24, color: theme.mainTextColor }}>☰</Text>
         </TouchableOpacity>
 
@@ -151,7 +149,7 @@ export default function SelectDestination() {
             },
           ]}
           // onPress={() => router.push({ pathname: "/select-route"})}
-          onPress={async () => await selectRoute({ latitude: destination?.poi_lat ?? 0, longitude: destination?.poi_lng ?? 0 }, token)}
+          onPress={async () => await selectRoute({ latitude: destination?.poi_lat ?? 0, longitude: destination?.poi_lng ?? 0 })}
           disabled={destination == null}
           accessibilityRole="button"
           accessibilityLabel="Start Journey"
