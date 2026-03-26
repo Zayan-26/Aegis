@@ -1,53 +1,43 @@
-// app/notifications.tsx
 import { router } from "expo-router";
 import {
-    SafeAreaView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  // SafeAreaView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useAccessibility } from "./AccessibilityContext";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { SafeAreaView } from 'react-native-safe-area-context'
+import BackBtn from "@/components/back-button";
 
 export default function NotificationsScreen() {
-  const { dyslexic, colorBlind, highContrast, largeButtons } =
-    useAccessibility();
-
-  const screenBackground = highContrast ? "#000000" : "#F7F8FC";
-  const boxBackground = highContrast ? "#1A1A1A" : "#FFFFFF";
-  const mainTextColor = highContrast ? "#FFFFFF" : "#1E2A78";
-  const smallTextColor = highContrast ? "#CCCCCC" : "#4F647A";
-  const boxBorderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
-  const buttonColor = colorBlind ? "#E69F00" : "#69B7C6";
-  const font = dyslexic ? "OpenDyslexic" : undefined;
-  const letterSpacing = dyslexic ? 1 : 0;
-  const lineH = dyslexic ? 24 : 20;
-  const labelSize = largeButtons ? 17 : 15;
+  const { highContrast, theme } = useAccessibility();
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: screenBackground }]}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
       <StatusBar
         barStyle={highContrast ? "light-content" : "dark-content"}
-        backgroundColor={screenBackground}
+        backgroundColor={theme.screenBackground}
       />
 
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: boxBorderColor }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+      <View style={[styles.header, { borderBottomColor: theme.boxBorderColor }]}>
+        {/* <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text
             style={[
               styles.backText,
-              { color: buttonColor, fontFamily: font, letterSpacing },
+              { color: theme.buttonColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
             ]}
           >
             ← Back
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+        <BackBtn/>
         <Text
           style={[
             styles.headerTitle,
-            { color: mainTextColor, fontFamily: font, letterSpacing },
+            { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
           ]}
         >
           Notifications
@@ -60,7 +50,7 @@ export default function NotificationsScreen() {
         <View
           style={[
             styles.notifCard,
-            { backgroundColor: boxBackground, borderColor: buttonColor },
+            { backgroundColor: theme.boxBackground, borderColor: theme.buttonColor },
           ]}
         >
           <View style={styles.notifBody}>
@@ -68,10 +58,10 @@ export default function NotificationsScreen() {
               style={[
                 styles.notifTitle,
                 {
-                  color: mainTextColor,
-                  fontFamily: font,
-                  letterSpacing,
-                  fontSize: labelSize + 1,
+                  color: theme.mainTextColor,
+                  fontFamily: theme.font,
+                  letterSpacing: theme.letterSpacing,
+                  fontSize: theme.labelSize + 1,
                 },
               ]}
             >
@@ -81,10 +71,10 @@ export default function NotificationsScreen() {
               style={[
                 styles.notifMessage,
                 {
-                  color: smallTextColor,
-                  fontFamily: font,
-                  letterSpacing,
-                  lineHeight: lineH,
+                  color: theme.smallTextColor,
+                  fontFamily: theme.font,
+                  letterSpacing: theme.letterSpacing,
+                  lineHeight: theme.lineH,
                 },
               ]}
             >
@@ -97,7 +87,7 @@ export default function NotificationsScreen() {
         <Text
           style={[
             styles.emptyText,
-            { color: mainTextColor, fontFamily: font, letterSpacing },
+            { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
           ]}
         >
           More notifications will appear here as you travel.
