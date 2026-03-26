@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "536981127622",
+    "project_id": "aegis-d4f2a",
+    "storage_bucket": "aegis-d4f2a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:536981127622:android:c6773cd32f815f5512f2c7",
+        "android_client_info": {
+          "package_name": "com.aegis.AEGIS"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBaS3p0793RCr4dvPbtmTAh3_BYN40gnKY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

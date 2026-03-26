@@ -1,12 +1,31 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { router } from "expo-router";
+import { useEffect } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+// import * as Notifications from 'expo-notifications';
+// import { registerForPushNotificationsAsync } from "@/apis/notifications";
+
+// Notifications.setNotificationHandler({
+//   handleNotification: async () => ({
+//     shouldShowBanner: true,
+//     shouldShowList: true,
+//     shouldPlaySound: false,
+//     shouldSetBadge: false,
+//   }),
+// });
+// FirebaseApp.initializeApp()
+// registerForPushNotificationsAsync('test')
 
 export default function WelcomeScreen() {
+  const {loggedIn} = useAuth()
+useEffect(() => {
+  if(loggedIn()) router.push("/select-destination")
+  })
 return(
 <View style={styles.container}>
 <View style={styles.topSection}>
 <Image 
-source={require("../assets/images/aegis-logo.png")}
+source={require("@/assets/images/aegis-logo.png")}
 style={styles.logoImage}
 resizeMode="contain" />
 

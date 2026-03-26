@@ -1,35 +1,37 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import "react-native-gesture-handler";
+import React, { useEffect } from "react";
+import { SplashScreen, Stack } from "expo-router";
+//!font
+import { useFonts } from "expo-font"
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AccessibilityProvider } from "@/contexts/AccessibilityContext";
+import { RoutingProvider } from "@/contexts/RoutingContext";
+import ToastManager from 'toastify-react-native'
+import { AuthProvider } from "@/contexts/AuthContext";
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+SplashScreen.preventAutoHideAsync();
+
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    'OpenDyslexic': require("@/assets/fonts/OpenDyslexic-Regular.otf")
+  })
+  useEffect(() => {
+    if (loaded || error) SplashScreen.hideAsync()
+  }, [loaded, error])
+
+  if (!loaded && !error) return null
 
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
+    <AuthProvider>
+      <RoutingProvider>
+        <ToastManager />
+        <AccessibilityProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <Stack screenOptions={{ headerShown: false }} />
+          </GestureHandlerRootView>
+        </AccessibilityProvider>
+      </RoutingProvider>
+    </AuthProvider>
   );
 }

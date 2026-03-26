@@ -1,0 +1,18 @@
+<script>
+    const ROUTE_ENDPOINT = "FILL ME UP"
+    const TEST_TOKEN = "if there's auth then this is needed"
+    const TEST_SOURCE =  { latitude: 52.456228, longitude: -1.938147 }
+    const TEST_DESTINATION =  { latitude: 52.476992, longitude: -1.894509 }
+    async function fetchRoutes() {
+        const res = await fetch(ROUTE_ENDPOINT, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ TEST_TOKEN, TEST_SOURCE, TEST_DESTINATION }),
+        })
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(`Could not get route: ${res.status} ${text}`);
+        }
+        console.log(res.json())
+    }
+</script>

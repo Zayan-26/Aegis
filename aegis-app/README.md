@@ -1,9 +1,7 @@
-# Welcome to your Expo app 👋
+# Mobile Application for AEGIS
+*Note that this application does not contain a web version as it uses react-native-maps.*
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
-
-## Get started
-
+## Run Application
 1. Install dependencies
 
    ```bash
@@ -23,28 +21,18 @@ In the output, you'll find options to open the app in a
 - [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
 - [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## Development Notes
 
-## Get a fresh project
+### API Endpoints
+API Endpoints are store in ./constants/endpoints.ts. Check the message formats in ./apis/ and change the endpoints accordingly.
 
-When you're ready, run:
+### Map Rendering
+If you want the application to work, a map tile server + POI server will at least need to be provided. The one running on my computer will not be on after this project concludes, check ../aegis-map/README.md for information on how to recreate the data needed. (Hoping it works)
 
-```bash
-npm run reset-project
-```
+## Testing
+Individual interfacing tests are included, as the expo-jest related front-end tests are going-through a weird dependenci=y restructure.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Authentication
 
-## Learn more
+The authentication system for the front-end was tested in bits via the stone-age html files included in the `api` folder.
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
