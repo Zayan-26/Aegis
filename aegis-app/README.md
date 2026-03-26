@@ -28,3 +28,11 @@ API Endpoints are store in ./constants/endpoints.ts. Check the message formats i
 
 ### Map Rendering
 If you want the application to work, a map tile server + POI server will at least need to be provided. The one running on my computer will not be on after this project concludes, check ../aegis-map/README.md for information on how to recreate the data needed. (Hoping it works)
+
+## Testing
+Individual interfacing tests are included, as the expo-jest related front-end tests are going-through a weird dependenci=y restructure.
+
+### Authentication
+
+The authentication system for the front-end was tested in bits via the stone-age html files included in the `api` folder.
+
