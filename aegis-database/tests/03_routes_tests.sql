@@ -147,9 +147,9 @@ VALUES (
 );
 
 -- Cleaning up the test cases
--- SET SQL_SAFE_UPDATES = 0;
+SET SQL_SAFE_UPDATES = 0;
 DELETE FROM routes WHERE destination_name = 'Test destination';
--- SET SQL_SAFE_UPDATES = 1;
+SET SQL_SAFE_UPDATES = 1;
 
-Select * FROM routes; -- to check if the test case is removed
+-- Select * FROM routes; -- to check if the test case is removed
 

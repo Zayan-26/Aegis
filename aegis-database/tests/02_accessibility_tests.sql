@@ -27,7 +27,7 @@ SELECT * FROM accessibility_prefs
 WHERE user_id = 'a1b2c3d4-0001-0001-0001-000000000001';
 
 -- Testing Query 2 - GET preferences
-SELECT dyslexia_support, colour_blind_friendly, high_constrast, large_touch_buttons
+SELECT dyslexia_support, colour_blind_friendly, high_contrast, large_touch_buttons
 FROM accessibility_prefs
 WHERE user_id = 'a1b2c3d4-0001-0001-0001-000000000001';
 

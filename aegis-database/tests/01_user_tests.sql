@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS aegis; --create database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS aegis; -- create database if it doesn't exist
 USE aegis;
 
 /*Test 11, 12, 13 will give errors */
@@ -11,7 +11,7 @@ VALUES (
     'Test User',
     'testuser@gmail.com',
     '$2a$10$hashedpassword99999999999999999999999999999999999999999'
-);
+ );
 -- Verify:
 SELECT * FROM users WHERE email = 'testuser@gmail.com';
 
@@ -22,14 +22,14 @@ FROM users
 WHERE email = 'mahima@gmail.com'
 AND is_active = TRUE;
 
---Test 3: Login with deleted account ───────────────────────
+-- Test 3: Login with deleted account ───────────────────────
 -- Expected: Returns empty — deleted user cannot log in
 SELECT user_id, full_name, email
 FROM users
 WHERE email = 'deleted.user@gmail.com'
 AND is_active = TRUE;
 
---Test 4: Login with wrong email 
+-- Test 4: Login with wrong email 
 -- Expected: Returns empty — email doesn't exist
 SELECT user_id, full_name, email
 FROM users
@@ -52,7 +52,7 @@ WHERE email = 'brandnew@gmail.com';
 -- Expected: Returns Mahima's profile without password_hash
 SELECT user_id, full_name, email, is_active, created_at
 FROM users
-WHERE user_id = 'a1b2c3d4-0001-0001-0001-000000000001' --remove the user_id to all active users
+WHERE user_id = 'a1b2c3d4-0001-0001-0001-000000000001' -- remove the user_id to all active users
 AND is_active = TRUE;
 
 -- Test 8: Get deleted user profile 
@@ -71,6 +71,9 @@ AND is_active = TRUE;
 -- Verify:
 SELECT full_name FROM users
 WHERE user_id = 'a1b2c3d4-0001-0001-0001-000000000001';
+-- After verifying the name update, reset it back:
+UPDATE users SET full_name = 'Mahima Gupta'
+WHERE user_id = 'a1b2c3d4-0001-0001-0001-000000000001';
 
 --  Test 10: Deactivate account 
 -- Expected: 1 row updated, is_active becomes FALSE
@@ -83,6 +86,10 @@ AND is_active = TRUE;
 SELECT user_id, full_name, is_active, deactivated_at
 FROM users
 WHERE user_id = 'a1b2c3d4-0004-0004-0004-000000000004';
+-- At the end of cleanup section, reactivate user 0004:
+UPDATE users SET is_active = TRUE, deactivated_at = NULL
+WHERE user_id = 'a1b2c3d4-0004-0004-0004-000000000004';
+
 
 --  Test 11: Try invalid email format 
 -- Expected: ERROR — violates chk_users_email constraint
