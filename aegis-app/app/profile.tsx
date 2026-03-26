@@ -14,8 +14,10 @@ import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { SafeAreaView } from 'react-native-safe-area-context'
 import BackBtn from "@/components/back-button";
 import { useAuth } from "@/contexts/AuthContext";
+import { logout } from "@/apis/authentication";
 
 export default function ProfileScreen() {
+  const { token } = useAuth()
   const {
     highContrast,
     largeButtons,
@@ -51,6 +53,7 @@ export default function ProfileScreen() {
         style: "destructive",
         onPress: () => {
           resetAll();
+          logout(token)
           router.replace("/");
         },
       },

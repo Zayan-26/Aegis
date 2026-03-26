@@ -29,7 +29,7 @@ function Avatar({ name, color }: { name: string; color: string }) {
 
 function TripDetails() {
     const { theme, highContrast, trustedContacts } = useAccessibility()
-    const { setSelected } = useAegisRouting()
+    const { setSelected, setNavigation } = useAegisRouting()
     const { token } = useAuth()
     // const { destination } = useSafetyRoutes()
     const selected = InternalRoutes[0]
@@ -45,9 +45,9 @@ function TripDetails() {
     const backBtn = () => {
         setSelected(undefined)
     }
-    const navigationBtn = async () => {
-        if(token) await fetchNavigation(token, selected.token)
-        router.push('/(tabs)/navigation')
+    const navigationBtn = async (contactNos: string) => {
+        if (token) setNavigation(await fetchNavigation(token, selected.token))
+        router.push({ pathname: '/navigation', params: { contactNos } })
     }
     const [sharedContacts, setSharedContacts] = useState<Record<string, boolean>>(
         Object.fromEntries(trustedContacts.map((c) => [c.id, true])),
@@ -290,8 +290,10 @@ function TripDetails() {
                         {*/}
 
                         <TouchableOpacity
-                        //TODO
-                            onPress={() => navigationBtn()}
+                            onPress={() => {
+                                // navigationBtn(sharedContacts)
+                                console.log(sharedContacts)
+                            }}
                             style={[
                                 styles.startBtn,
                                 {

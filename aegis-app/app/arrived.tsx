@@ -12,6 +12,7 @@ import {
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useAccessibility } from "@/contexts/AccessibilityContext";
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useAegisRouting } from "@/contexts/RoutingContext";
 
 export default function ArrivedScreen() {
   const { destination, distance, duration, routeLabel } = useLocalSearchParams<{
@@ -23,6 +24,7 @@ export default function ArrivedScreen() {
 
   const { highContrast, largeButtons, notifyOn, theme } =
     useAccessibility();
+  const {selected } = useAegisRouting()
 
   const bottomSheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ["30%", "55%", "85%"], []);
@@ -138,7 +140,7 @@ export default function ArrivedScreen() {
                     },
                   ]}
                 >
-                  {distance}
+                  {selected?.distance}
                 </Text>
               </View>
               <View
@@ -170,7 +172,7 @@ export default function ArrivedScreen() {
                     },
                   ]}
                 >
-                  {duration}
+                  {selected?.duration}
                 </Text>
               </View>
             </View>
@@ -263,7 +265,7 @@ export default function ArrivedScreen() {
                   borderRadius: theme.btnRadius,
                 },
               ]}
-              onPress={() => router.replace("/(tabs)/select-destination")}
+              onPress={() => router.replace("/select-destination")}
               accessibilityLabel="Return to Home"
             >
               <Text
