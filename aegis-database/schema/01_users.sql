@@ -1,4 +1,4 @@
-CREATE DATABASE IF NOT EXISTS aegis; --create database if it doesn't exist
+CREATE DATABASE IF NOT EXISTS aegis; -- create database if it doesn't exist
 USE aegis;
 
 DROP TABLE IF EXISTS users;
