@@ -9,7 +9,6 @@ from models import Coordinate, RouteOption
 
 BBOX = (-1.939288, 52.440136, -1.907945, 52.461872)
 
-
 @dataclass(frozen=True)
 class Node:
     node_id: str
@@ -94,7 +93,7 @@ def nearest_node(coord: Coordinate) -> str:
     return min(NODES, key=lambda node_id: haversine_km(coord, NODES[node_id].coord))
 
 
-def edge_cost(edge: Edge, profile: str, wheelchair_required: bool = True) -> float:
+def edge_cost(edge: Edge, profile: str, wheelchair_required: bool = True, time_of_day: str = "DAY") -> float:
     if wheelchair_required and (not edge.wheelchair_accessible or edge.has_stairs):
         return float("inf") if profile == "safest" else edge.distance_km * 5
 
@@ -111,6 +110,17 @@ def edge_cost(edge: Edge, profile: str, wheelchair_required: bool = True) -> flo
         + edge.slope * 0.08
         + edge.crowd * 0.03
     )
+    if time_of_day == "NIGHT":
+        safety_penalty *= 1.5
+    elif time_of_day == "EVENING":
+        safety_penalty *= 1.2
+    elif time_of_day == "AFTERNOON":
+        safety_penalty *= 1.0
+    else: #morning
+        safety_penalty *= 0.9
+
+
+
     if edge.construction:
         safety_penalty += 1.2
     if edge.covered:
@@ -120,7 +130,7 @@ def edge_cost(edge: Edge, profile: str, wheelchair_required: bool = True) -> flo
     return edge.distance_km + max(0.0, safety_penalty)
 
 
-def dijkstra(start: str, goal: str, profile: str, wheelchair_required: bool = True) -> Tuple[List[str], List[Edge]]:
+def dijkstra(start: str, goal: str, profile: str, wheelchair_required: bool = True, time_of_day: str = "DAY") -> Tuple[List[str], List[Edge]]:
     heap: List[Tuple[float, str]] = [(0.0, start)]
     costs: Dict[str, float] = {start: 0.0}
     prev: Dict[str, Tuple[str, Edge]] = {}
@@ -196,52 +206,34 @@ def describe_route(edges: Iterable[Edge]) -> str:
     return ", ".join(traits)
 
 
-def build_route_option(route_id: str, label: str, source: Coordinate, destination: Coordinate, profile: str, wheelchair_required: bool = True) -> RouteOption:
-    if not in_bbox(source) or not in_bbox(destination):
-        raise ValueError("Coordinates are outside the current prototype area.")
-
+def build_route_option(route_id, label, source, destination, profile, wheelchair_required=True, time_of_day="DAY"):
     start = nearest_node(source)
     goal = nearest_node(destination)
-    node_path, edges = dijkstra(start, goal, profile, wheelchair_required)
-    coordinates = [source] + [NODES[node_id].coord for node_id in node_path] + [destination]
-    distance = sum(edge.distance_km for edge in edges) + haversine_km(source, NODES[start].coord) + haversine_km(destination, NODES[goal].coord)
-    walking_factor = 12 if profile == "safest" else 11
-    time_minutes = max(4, round(distance * walking_factor))
-    score = route_score(edges) if profile == "safest" else None
-    segments = [
-        {
-            "edge_id": edge.edge_id,
-            "from": edge.start,
-            "to": edge.end,
-            "distance_km": edge.distance_km,
-            "lighting": edge.lighting,
-            "crime_risk": edge.crime_risk,
-            "slope": edge.slope,
-            "crowd": edge.crowd,
-            "wheelchair_accessible": edge.wheelchair_accessible,
-            "covered": edge.covered,
-            "rest_point": edge.rest_point,
-            "construction": edge.construction,
-            "has_stairs": edge.has_stairs,
-        }
-        for edge in edges
-    ]
+
+    node_path, edges = dijkstra(start, goal, profile, wheelchair_required, time_of_day)
+
+    coordinates = [source] + [NODES[n].coord for n in node_path] + [destination]
+    distance = sum(e.distance_km for e in edges)
+
     return RouteOption(
         route_id=route_id,
         label=label,
-        score=score,
-        time_minutes=time_minutes,
+        score=None,
+        time_minutes=round(distance * 12),
         distance_km=distance,
-        description=describe_route(edges),
+        description="Generated route",
         coordinates=coordinates,
-        segments=segments,
+        segments=[]
     )
 
 
-def build_routes(source: Coordinate, destination: Coordinate, wheelchair_required: bool = True) -> Dict[str, RouteOption]:
-    safest = build_route_option("safest", "Safest Route", source, destination, profile="safest", wheelchair_required=wheelchair_required)
-    fastest = build_route_option("fastest", "Fastest Route", source, destination, profile="fastest", wheelchair_required=wheelchair_required)
+def build_routes(source, destination, wheelchair_required=True, time_of_day="DAY"):
+    safest = build_route_option("safest", "Safest Route", source, destination, "safest", wheelchair_required, time_of_day)
+    fastest = build_route_option("fastest", "Fastest Route", source, destination, "fastest", wheelchair_required, time_of_day)
+
     return {"safest": safest, "fastest": fastest}
+
+
 
 
 def nearest_edge_risk(coord: Coordinate) -> Optional[Edge]:
