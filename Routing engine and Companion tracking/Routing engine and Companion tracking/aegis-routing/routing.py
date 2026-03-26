@@ -109,7 +109,7 @@ def edge_cost(edge: Edge, profile: str, wheelchair_required: bool = True, time_o
         + max(0, 6 - edge.lighting) * 0.18
         + edge.slope * 0.08
         + edge.crowd * 0.03
-    )
+    ) #added multipliers for safety score depending on the time of night
     if time_of_day == "NIGHT":
         safety_penalty *= 1.5
     elif time_of_day == "EVENING":
@@ -205,7 +205,7 @@ def describe_route(edges: Iterable[Edge]) -> str:
         traits.append("balanced urban route")
     return ", ".join(traits)
 
-
+#added time of day to incorporate when building route option
 def build_route_option(route_id, label, source, destination, profile, wheelchair_required=True, time_of_day="DAY"):
     start = nearest_node(source)
     goal = nearest_node(destination)
