@@ -1,5 +1,8 @@
 # Folder for Maptiles/POI self-hosting
 Sorry for making this stuff spontaneously appear, I forgot to move it here.
+##Chungus
+
+I'm a chungus, once you have the tiles.mbtiles and fonts you can put them into the tileserver-gl folder and modify the config.json, then run docker compose run in this directory for the map tiles and poi to function.
 
 ## Overview
 I was the sole person to work on these as they provide frontend-related capabilities. <br>
