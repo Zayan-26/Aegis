@@ -9,4 +9,5 @@ The frontend was made using an expo app and so its README contains instructions 
 
 The routing section was incorporated into the backend during the development of the prototype and so should be ignored when running the program as the routing algorithm is completely calculated in the backend.
 
+In order to have a better understanding of what each component is and how you can run each component, please check the individual README.md files in each sub-folder of the repository. 
 
