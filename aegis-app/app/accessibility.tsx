@@ -7,7 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAccessibility } from "./AccessibilityContext";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
+import BackBtn from "@/components/back-button";
 
 export default function AccessibilityScreen() {
   const {
@@ -19,29 +20,8 @@ export default function AccessibilityScreen() {
     setHighContrast,
     largeButtons,
     setLargeButtons,
+    theme
   } = useAccessibility();
-
-  const screenBg = highContrast ? "#000000" : "#F7F8FC";
-  const boxBg = highContrast ? "#1A1A1A" : "#FFFFFF";
-  const mainTextColor = highContrast ? "#FFFFFF" : "#1E2A78";
-  const smallTextColor = highContrast ? "#CCCCCC" : "#4F647A";
-  const boxBorderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
-  const buttonColor = colorBlind ? "#E69F00" : "#69B7C6";
-  const buttonTextColor = colorBlind ? "#000000" : "#FFFFFF";
-
-  // ── Dyslexic mode — very noticeable changes ────────────────
-  const font = dyslexic ? "OpenDyslexic" : undefined;
-  const letterSpacing = dyslexic ? 1 : 0;
-  const lineH = dyslexic ? 24 : 20;
-  const dyslexicFontSize = dyslexic ? 15 : undefined;
-
-  const btnPadding = largeButtons ? 22 : 16;
-  const btnRadius = largeButtons ? 20 : 16;
-  const titleSize = largeButtons ? 32 : 28;
-  const labelSize = largeButtons ? 18 : 16;
-  const descSize = largeButtons ? 15 : 13;
-  const btnTextSize = largeButtons ? 20 : 18;
-  const cardPadding = largeButtons ? 20 : 16;
 
   const features = [
     {
@@ -83,24 +63,25 @@ export default function AccessibilityScreen() {
   const anyActive = dyslexic || colorBlind || highContrast || largeButtons;
 
   return (
-    <View style={[styles.container, { backgroundColor: screenBg }]}>
+    <View style={[styles.container, { backgroundColor: theme.screenBackground }]}>
       {/* Back button */}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => router.back()}
         style={{ alignSelf: "flex-start", marginBottom: 8 }}
       >
         <Text
           style={{
-            color: mainTextColor,
+            color: theme.mainTextColor,
             fontSize: 16,
-            fontWeight: "600",
-            fontFamily: font,
-            letterSpacing,
+            fontWeight: "500",
+            fontFamily: theme.font,
+            letterSpacing: theme.letterSpacing,
           }}
         >
           ← Back
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
+      <BackBtn/>
 
       {/* Header */}
       <View style={styles.header}>
@@ -108,8 +89,8 @@ export default function AccessibilityScreen() {
           style={[
             styles.logo,
             {
-              color: mainTextColor,
-              fontFamily: font,
+              color: theme.mainTextColor,
+              fontFamily: theme.font,
               letterSpacing: dyslexic ? 4 : 1,
             },
           ]}
@@ -120,10 +101,10 @@ export default function AccessibilityScreen() {
           style={[
             styles.title,
             {
-              color: mainTextColor,
-              fontSize: titleSize,
-              fontFamily: font,
-              letterSpacing,
+              color: theme.mainTextColor,
+              fontSize: theme.titleSize,
+              fontFamily: theme.font,
+              letterSpacing: theme.letterSpacing,
             },
           ]}
         >
@@ -133,11 +114,11 @@ export default function AccessibilityScreen() {
           style={[
             styles.subtitle,
             {
-              color: smallTextColor,
-              fontFamily: font,
-              lineHeight: lineH,
-              letterSpacing,
-              fontSize: dyslexicFontSize ?? 15,
+              color: theme.smallTextColor,
+              fontFamily: theme.font,
+              lineHeight: theme.lineH,
+              letterSpacing: theme.letterSpacing,
+              fontSize: theme.dyslexicFontSize ?? 15,
             },
           ]}
         >
@@ -157,11 +138,11 @@ export default function AccessibilityScreen() {
             style={[
               styles.card,
               {
-                backgroundColor: boxBg,
-                padding: cardPadding,
+                backgroundColor: theme.boxBackground,
+                padding: theme.cardPadding,
                 borderColor: feature.value
                   ? feature.activeColor
-                  : boxBorderColor,
+                  : theme.boxBorderColor,
                 borderWidth: feature.value ? 2 : 1,
               },
             ]}
@@ -176,10 +157,10 @@ export default function AccessibilityScreen() {
                 style={[
                   styles.featureLabel,
                   {
-                    color: feature.value ? feature.activeColor : mainTextColor,
-                    fontSize: dyslexicFontSize ?? labelSize,
-                    fontFamily: font,
-                    letterSpacing,
+                    color: feature.value ? feature.activeColor : theme.mainTextColor,
+                    fontSize: theme.dyslexicFontSize ?? theme.labelSize,
+                    fontFamily: theme.font,
+                    letterSpacing: theme.letterSpacing,
                     lineHeight: dyslexic ? 32 : undefined,
                   },
                 ]}
@@ -190,12 +171,12 @@ export default function AccessibilityScreen() {
                 style={[
                   styles.featureDesc,
                   {
-                    color: smallTextColor,
-                    fontSize: dyslexicFontSize
-                      ? dyslexicFontSize - 2
-                      : descSize,
-                    fontFamily: font,
-                    lineHeight: lineH,
+                    color: theme.smallTextColor,
+                    fontSize: theme.dyslexicFontSize
+                      ? theme.dyslexicFontSize - 2
+                      : theme.descSize,
+                    fontFamily: theme.font,
+                    lineHeight: theme.lineH,
                     letterSpacing: dyslexic ? 1.5 : 0,
                     marginTop: dyslexic ? 6 : 2,
                   },
@@ -223,9 +204,9 @@ export default function AccessibilityScreen() {
           style={[
             styles.resetButton,
             {
-              borderColor: boxBorderColor,
-              paddingVertical: btnPadding - 4,
-              borderRadius: btnRadius,
+              borderColor: theme.boxBorderColor,
+              paddingVertical: theme.btnPadding - 4,
+              borderRadius: theme.btnRadius,
               opacity: anyActive ? 1 : 0.35,
             },
           ]}
@@ -241,10 +222,10 @@ export default function AccessibilityScreen() {
             style={[
               styles.resetText,
               {
-                color: mainTextColor,
-                fontFamily: font,
-                fontSize: labelSize - 1,
-                letterSpacing,
+                color: theme.mainTextColor,
+                fontFamily: theme.font,
+                fontSize: theme.labelSize - 1,
+                letterSpacing: theme.letterSpacing,
               },
             ]}
           >
@@ -259,9 +240,9 @@ export default function AccessibilityScreen() {
           style={[
             styles.button,
             {
-              backgroundColor: buttonColor,
-              paddingVertical: btnPadding,
-              borderRadius: btnRadius,
+              backgroundColor: theme.buttonColor,
+              paddingVertical: theme.btnPadding,
+              borderRadius: theme.btnRadius,
             },
           ]}
           onPress={() => router.push("/trusted-contacts")}
@@ -270,10 +251,10 @@ export default function AccessibilityScreen() {
             style={[
               styles.primaryButtonText,
               {
-                color: buttonTextColor,
-                fontSize: btnTextSize,
-                fontFamily: font,
-                letterSpacing,
+                color: theme.buttonTextColor,
+                fontSize: theme.btnTextSize,
+                fontFamily: theme.font,
+                letterSpacing: theme.letterSpacing,
               },
             ]}
           >
@@ -281,28 +262,28 @@ export default function AccessibilityScreen() {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.back()}>
+        {/* <TouchableOpacity onPress={() => router.back()}>
           <Text
             style={[
               styles.backText,
               {
-                color: mainTextColor,
-                fontFamily: font,
+                color: theme.mainTextColor,
+                fontFamily: theme.font,
                 fontSize: largeButtons ? 17 : 15,
-                letterSpacing,
+                letterSpacing: theme.letterSpacing,
               },
             ]}
           >
             Back
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingHorizontal: 24, paddingTop: 60 },
+  container: { flex: 1, paddingHorizontal: 24, paddingTop: 70 },
   header: { alignItems: "center", marginBottom: 24 },
   logo: {
     fontSize: 36,

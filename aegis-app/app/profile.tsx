@@ -1,9 +1,8 @@
-// app/profile.tsx
 import { router } from "expo-router";
 import {
   Alert,
   Linking,
-  SafeAreaView,
+  // SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -11,12 +10,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useAccessibility } from "./AccessibilityContext";
+import { useAccessibility } from "@/contexts/AccessibilityContext";
+import { SafeAreaView } from 'react-native-safe-area-context'
+import BackBtn from "@/components/back-button";
+import { useAuth } from "@/contexts/AuthContext";
+import { logout } from "@/apis/authentication";
 
 export default function ProfileScreen() {
+  const { token, displayName } = useAuth()
   const {
-    dyslexic,
-    colorBlind,
     highContrast,
     largeButtons,
     setDyslexic,
@@ -24,17 +26,13 @@ export default function ProfileScreen() {
     setHighContrast,
     setLargeButtons,
     setTrustedContacts,
+    theme,
   } = useAccessibility();
+  const {
+    setDisplayName,
+    setToken
+  } = useAuth()
 
-  const screenBackground = highContrast ? "#000000" : "#F7F8FC";
-  const boxBackground = highContrast ? "#1A1A1A" : "#FFFFFF";
-  const mainTextColor = highContrast ? "#FFFFFF" : "#1E2A78";
-  const smallTextColor = highContrast ? "#CCCCCC" : "#4F647A";
-  const boxBorderColor = highContrast ? "#FFFFFF" : "#D9DDE7";
-  const buttonColor = colorBlind ? "#E69F00" : "#69B7C6";
-  const font = dyslexic ? "OpenDyslexic" : undefined;
-  const letterSpacing = dyslexic ? 1 : 0;
-  const labelSize = largeButtons ? 17 : 15;
   const btnPadding = largeButtons ? 18 : 14;
 
   const resetAll = () => {
@@ -43,6 +41,8 @@ export default function ProfileScreen() {
     setHighContrast(false);
     setLargeButtons(false);
     setTrustedContacts([]);
+    setDisplayName(null)
+    setToken(null)
   };
 
   const handleLogOut = () => {
@@ -53,6 +53,7 @@ export default function ProfileScreen() {
         style: "destructive",
         onPress: () => {
           resetAll();
+          logout(token)
           router.replace("/");
         },
       },
@@ -77,7 +78,7 @@ export default function ProfileScreen() {
     <Text
       style={[
         styles.sectionTitle,
-        { color: smallTextColor, fontFamily: font, letterSpacing },
+        { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
       ]}
     >
       {title}
@@ -100,7 +101,7 @@ export default function ProfileScreen() {
     <TouchableOpacity
       style={[
         styles.menuItem,
-        { paddingVertical: btnPadding, borderBottomColor: boxBorderColor },
+        { paddingVertical: btnPadding, borderBottomColor: theme.boxBorderColor },
       ]}
       onPress={onPress}
       activeOpacity={onPress ? 0.7 : 1}
@@ -109,7 +110,7 @@ export default function ProfileScreen() {
         <View
           style={[
             styles.menuIconWrap,
-            { backgroundColor: danger ? "#FFE5E5" : buttonColor + "20" },
+            { backgroundColor: danger ? "#FFE5E5" : theme.buttonColor + "20" },
           ]}
         >
           <Text style={styles.menuIcon}>{icon}</Text>
@@ -119,44 +120,43 @@ export default function ProfileScreen() {
         style={[
           styles.menuLabel,
           {
-            color: danger ? "#C0392B" : mainTextColor,
-            fontFamily: font,
-            fontSize: labelSize,
-            letterSpacing,
+            color: danger ? "#C0392B" : theme.mainTextColor,
+            fontFamily: theme.font,
+            fontSize: theme.labelSize,
+            letterSpacing: theme.letterSpacing,
           },
         ]}
       >
         {label}
       </Text>
-      {right ?? (
-        <Text style={[styles.chevron, { color: smallTextColor }]}>{"›"}</Text>
-      )}
+      {right ?? <Text style={[styles.chevron, { color: theme.smallTextColor }]}>›</Text>}
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: screenBackground }]}>
+    <SafeAreaView style={[styles.safe, { backgroundColor: theme.screenBackground }]}>
       <StatusBar
         barStyle={highContrast ? "light-content" : "dark-content"}
-        backgroundColor={screenBackground}
+        backgroundColor={theme.screenBackground}
       />
 
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: boxBorderColor }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
+      <View style={[styles.header, { borderBottomColor: theme.boxBorderColor }]}>
+        {/* <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
           <Text
             style={[
               styles.backText,
-              { color: buttonColor, fontFamily: font, letterSpacing },
+              { color: theme.buttonColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
             ]}
           >
-            {"← Back"}
+            ← Back
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+        <BackBtn/>
         <Text
           style={[
             styles.headerTitle,
-            { color: mainTextColor, fontFamily: font, letterSpacing },
+            { color: theme.mainTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
           ]}
         >
           Profile
@@ -164,38 +164,30 @@ export default function ProfileScreen() {
         <View style={styles.backBtn} />
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scroll}
-      >
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {/* Profile card */}
-        <View
-          style={[
-            styles.profileCard,
-            { backgroundColor: boxBackground, borderColor: boxBorderColor },
-          ]}
-        >
-          <View style={[styles.avatarCircle, { backgroundColor: buttonColor }]}>
-            <Text style={styles.avatarEmoji}>{"👤"}</Text>
+        <View style={[styles.profileCard, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
+          <View style={[styles.avatarCircle, { backgroundColor: theme.buttonColor }]}>
+            <Text style={styles.avatarEmoji}>👤</Text>
           </View>
           <View style={styles.profileInfo}>
             <Text
               style={[
                 styles.profileName,
                 {
-                  color: mainTextColor,
-                  fontFamily: font,
+                  color: theme.mainTextColor,
+                  fontFamily: theme.font,
                   fontSize: largeButtons ? 22 : 18,
-                  letterSpacing,
+                  letterSpacing: theme.letterSpacing,
                 },
               ]}
             >
-              Grace
+              {displayName}
             </Text>
             <Text
               style={[
                 styles.profileSub,
-                { color: smallTextColor, fontFamily: font, letterSpacing },
+                { color: theme.smallTextColor, fontFamily: theme.font, letterSpacing: theme.letterSpacing },
               ]}
             >
               +44 7700 900123
@@ -205,47 +197,20 @@ export default function ProfileScreen() {
 
         {/* Settings */}
         <SectionTitle title="SETTINGS" />
-        <View
-          style={[
-            styles.card,
-            { backgroundColor: boxBackground, borderColor: boxBorderColor },
-          ]}
-        >
-          <MenuItem
-            icon="👥"
-            label="Trusted Contacts"
-            onPress={() => router.push("/trusted-contacts")}
-          />
-          <MenuItem
-            icon="♿"
-            label="Accessibility Features"
-            onPress={() => router.push("/accessibility")}
-          />
+        <View style={[styles.card, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
+          <MenuItem icon="👥" label="Trusted Contacts" onPress={() => router.push("/trusted-contacts")} />
+          <MenuItem icon="♿" label="Accessibility Features" onPress={() => router.push("/accessibility")} />
         </View>
 
         {/* Notifications */}
         <SectionTitle title="NOTIFICATIONS" />
-        <View
-          style={[
-            styles.card,
-            { backgroundColor: boxBackground, borderColor: boxBorderColor },
-          ]}
-        >
-          <MenuItem
-            icon="🔔"
-            label="Notifications"
-            onPress={() => router.push("/notifications")}
-          />
+        <View style={[styles.card, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
+          <MenuItem icon="🔔" label="Notifications" onPress={() => router.push("/notifications")} />
         </View>
 
         {/* Help & Support */}
         <SectionTitle title="HELP & SUPPORT" />
-        <View
-          style={[
-            styles.card,
-            { backgroundColor: boxBackground, borderColor: boxBorderColor },
-          ]}
-        >
+        <View style={[styles.card, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
           <MenuItem
             icon="📞"
             label="Call Support"
@@ -260,10 +225,7 @@ export default function ProfileScreen() {
             label="Email Us"
             onPress={() =>
               Linking.openURL("mailto:support@aegis.co.uk").catch(() =>
-                Alert.alert(
-                  "Email Support",
-                  "Please email support@aegis.co.uk",
-                ),
+                Alert.alert("Email Support", "Please email support@aegis.co.uk"),
               )
             }
           />
@@ -271,23 +233,13 @@ export default function ProfileScreen() {
 
         {/* Log Out */}
         <SectionTitle title="" />
-        <View
-          style={[
-            styles.card,
-            { backgroundColor: boxBackground, borderColor: boxBorderColor },
-          ]}
-        >
+        <View style={[styles.card, { backgroundColor: theme.boxBackground, borderColor: theme.boxBorderColor }]}>
           <MenuItem icon="" label="Log Out" onPress={handleLogOut} danger />
         </View>
 
         {/* Delete Account */}
-        <TouchableOpacity
-          style={styles.deleteBtn}
-          onPress={handleDeleteAccount}
-        >
-          <Text style={[styles.deleteBtnText, { fontFamily: font }]}>
-            Delete Account
-          </Text>
+        <TouchableOpacity style={styles.deleteBtn} onPress={handleDeleteAccount}>
+          <Text style={[styles.deleteBtnText, { fontFamily: theme.font }]}>Delete Account</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
