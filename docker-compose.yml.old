@@ -1,0 +1,35 @@
+services:
+  server:
+    extends:
+      file: aegis-server/docker-compose.yml
+      service: server
+    environment:
+        SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/aegis
+        SPRING_DATASOURCE_USERNAME: system
+        SPRING_DATASOURCE_PASSWORD: troglodyte
+    depends_on: 
+      db:
+        condition: service_healthy
+    #ports:
+    #  - 8080:8080
+  db:
+    extends:
+      file: aegis-database/docker-compose.yml
+      service: db
+  map:
+    extends:
+      file: aegis-map/docker-compose.yml
+      service: mts
+  cfd:
+    image: cloudflare/cloudflared:latest
+    environment:
+      - TUNNEL_TOKEN
+    command: "tunnel run"
+    depends_on:
+      - db
+      - server
+      - map
+  # Cloudflare Tunnel Settings:
+  # server:8080 < server.aegis.burntheatlantic.com
+  # map:8080 < mts.aegis.burntheatlantic.com
+  # map:3000 < poi.aegis.burntheatlantic.com

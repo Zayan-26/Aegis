@@ -11,3 +11,5 @@ The routing section was incorporated into the backend during the development of 
 
 In order to have a better understanding of what each component is and how you can run each component, please check the individual README.md files in each sub-folder of the repository. 
 
+[3:00 06/05/26]
+The entire backend should be deployable with a simple 'docker compose up' from this directory, just needs a bit of configuring if you're using cloudflare tunnels / using a local setup and publishing your ports one by one.

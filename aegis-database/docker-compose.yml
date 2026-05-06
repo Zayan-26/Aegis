@@ -1,0 +1,15 @@
+services:
+  db:
+    image: pacificguardian/aegis-db:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: aegis
+      MYSQL_USER: system
+      MYSQL_PASSWORD: troglodyte
+      MYSQL_ROOT_PASSWORD: caveman
+    healthcheck:
+      test: bash -c 'mysqladmin ping -h localhost -u root --password="$MYSQL_ROOT_PASSWORD"'
+      interval: 5s
+      timeout: 5s
+      retries: 10
+

@@ -1,0 +1,47 @@
+services:
+  server:
+    image: pacificguardian/aegis-server:latest
+    #Brute forcing restarts
+    restart: always
+    environment:
+        SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/aegis
+        SPRING_DATASOURCE_USERNAME: system
+        SPRING_DATASOURCE_PASSWORD: troglodyte
+        SPRING_PROFILES_ACTIVE: prod
+    depends_on: 
+      db:
+        condition: service_healthy
+  db:
+    image: pacificguardian/aegis-db:latest
+    restart: always
+    environment:
+      MYSQL_DATABASE: aegis
+      MYSQL_USER: system
+      MYSQL_PASSWORD: troglodyte
+      MYSQL_ROOT_PASSWORD: caveman
+    healthcheck:
+      test: bash -c 'mysqladmin ping -h localhost -u root --password="$MYSQL_ROOT_PASSWORD"'
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  map:
+    image: pacificguardian/aegis-map:latest
+    #Brute forcing restarts
+    restart: always
+    volumes:
+      - ./map_data/poi-data:/var/lib/postgresql/data
+      - ./map_data/tileserver-gl:/data
+      - ./map_data/source:/data/source
+  cfd:
+    image: cloudflare/cloudflared:latest
+    environment:
+      - TUNNEL_TOKEN
+    command: "tunnel run"
+    depends_on:
+      - db
+      - server
+      - map
+  # Cloudflare Tunnel Settings:
+  # aegis.burntheatlantic.com^/api > http://server:8080
+  # aegis.burntheatlantic.com^/rpc > http://map:3000
+  # aegis.burntheatlantic.com > http://map:8080

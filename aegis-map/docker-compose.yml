@@ -1,10 +1,11 @@
 services:
   mts:
     image: pacificguardian/aegis-map:latest
-    ports:
-      - "8080:8080" # TileServer-GL
-      - "3000:3000" # PostgREST API
-      - "5432:5432" # Postgres (Optional local access)
+    # Commented because I'm tryin to port the entire backend to be able to be run in a single docker compose stack
+    #ports:
+    #  - "8080:8080" # TileServer-GL
+    #  - "3000:3000" # PostgREST API
+    #  - "5432:5432" # Postgres (Optional local access)
     volumes:
       - ./poi-data:/var/lib/postgresql/data
       - ./tileserver-gl:/data

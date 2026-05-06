@@ -1,17 +1,25 @@
 # syntax=docker/dockerfile:1.4
-FROM postgrest/postgrest:latest AS postgrest_bin
-FROM postgis/postgis:latest
+FROM maptiler/tileserver-gl:latest
 
+USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Map Configuration
+# --- System Deps ---
+# xvfb and libgl1-mesa-dri are MANDATORY for raster tile generation on headless devices
+RUN apt-get update && apt-get install -y \
+    openjdk-21-jre-headless wget git supervisor osm2pgsql osmium-tool ca-certificates \
+    postgresql postgresql-client libgl1-mesa-dri xvfb curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# --- ENV VARS ---
 ENV MAP_NAME="brum"
 ENV OSM_URL="https://download.geofabrik.de/europe/united-kingdom/england/west-midlands-latest.osm.pbf"
 ENV BBOX="-2.1,52.35,-1.7,52.6"
 ENV PUID=1000
 ENV PGID=1000
 
-# Database Configuration
 ENV POSTGRES_DB=o2p
 ENV POSTGRES_USER=o2p
 ENV POSTGRES_PASSWORD=o2p
@@ -20,23 +28,11 @@ ENV PGRST_DB_URI=postgres://o2p:o2p@127.0.0.1:5432/o2p
 ENV PGRST_DB_ANON_ROLE=web_anon
 ENV PGRST_SERVER_PORT=3000
 
-COPY --from=postgrest_bin /bin/postgrest /usr/local/bin/postgrest
+COPY --from=postgrest/postgrest:latest /bin/postgrest /usr/local/bin/postgrest
 
-RUN apt-get update && apt-get install -y \
-    curl wget gnupg supervisor osm2pgsql osmium-tool git ca-certificates \
-    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g tileserver-gl-light \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN wget -q https://download.java.net/java/GA/jdk21/fd2272bbf8e04c3dbaee13770090416c/35/GPL/openjdk-21_linux-x64_bin.tar.gz -O /tmp/jdk21.tar.gz \
-    && tar -xzf /tmp/jdk21.tar.gz -C /opt && mv /opt/jdk-21 /opt/jdk && rm /tmp/jdk21.tar.gz
-ENV PATH="/opt/jdk/bin:${PATH}"
-
-WORKDIR /app
 RUN wget -q https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar -O /app/planetiler.jar
 
-# Style Patcher
+# --- Setup Styles Patch Script ---
 COPY <<-"EOF" /app/setup_styles.js
 const fs = require('fs');
 const path = require('path');
@@ -77,19 +73,11 @@ getAllStyles(stylesDir).forEach(f => {
 fs.writeFileSync(`${dataDir}/config.json`, JSON.stringify(config, null, 2));
 EOF
 
+# --- Supervisor config ---
 COPY <<-"EOF" /etc/supervisor/conf.d/supervisord.conf
 [supervisord]
 nodaemon=true
 user=root
-
-[program:postgresql]
-command=docker-entrypoint.sh postgres
-user=postgres
-autorestart=true
-stdout_logfile=/dev/stdout
-stdout_logfile_maxbytes=0
-stderr_logfile=/dev/stderr
-stderr_logfile_maxbytes=0
 
 [program:postgrest]
 command=/usr/local/bin/postgrest
@@ -101,7 +89,8 @@ stderr_logfile_maxbytes=0
 
 [program:tileserver]
 directory=/data
-command=/usr/bin/env npx tileserver-gl-light -c config.json --port 8080
+# xvfb-run -a creates the virtual display required for raster rendering
+command=xvfb-run -a node /usr/src/app --config /data/config.json --port 8080
 autorestart=true
 stdout_logfile=/dev/stdout
 stdout_logfile_maxbytes=0
@@ -109,15 +98,44 @@ stderr_logfile=/dev/stderr
 stderr_logfile_maxbytes=0
 EOF
 
-# Entrypoint with the "Dawg-Fix" Script Patcher
+# --- Entrypoint ---
 COPY <<-"EOF" /app/entrypoint.sh
 #!/bin/bash
 set -e
 
+export PGDATA="/var/lib/postgresql/data"
+export PGUSER="o2p"
+export PGPASSWORD="o2p"
+export PGDB="o2p"
+
+# --- Start Postgres ---
+if [ ! -s "$PGDATA/PG_VERSION" ]; then
+  mkdir -p "$PGDATA"
+  chown -R postgres:postgres "$PGDATA"
+  su - postgres -c "/usr/lib/postgresql/16/bin/initdb -D $PGDATA"
+fi
+
+su - postgres -c "/usr/lib/postgresql/16/bin/postgres -D $PGDATA" &
+until su - postgres -c "psql -c '\l'" >/dev/null 2>&1 ; do sleep 1; done
+
+su - postgres -c "psql -tc \"SELECT 1 FROM pg_roles WHERE rolname='$PGUSER'\"" | grep -q 1 \
+  || su - postgres -c "psql -c \"CREATE ROLE $PGUSER LOGIN PASSWORD '$PGPASSWORD';\""
+su - postgres -c "psql -lqt" | cut -d \| -f 1 | grep -qw "$PGDB" \
+  || su - postgres -c "psql -c \"CREATE DATABASE $PGDB OWNER $PGUSER;\""
+su - postgres -c "psql -d $PGDB -c 'CREATE EXTENSION IF NOT EXISTS postgis;'"
+
+# --- Data Prep ---
 mkdir -p /data/source /data/fonts /data/styles_src
+
+# Get sprites
+wget -q -O /data/sprite.json "https://api.maptiler.com/maps/streets-v4/sprite.json"
+wget -q -O /data/sprite.png "https://api.maptiler.com/maps/streets-v4/sprite.png"
+wget -q -O /data/sprite@2x.json "https://api.maptiler.com/maps/streets-v4/sprite@2x.json"
+wget -q -O /data/sprite@2x.png "https://api.maptiler.com/maps/streets-v4/sprite@2x.png"
 
 [ ! -f "/data/source/region.osm.pbf" ] && wget -O /data/source/region.osm.pbf "${OSM_URL}"
 [ ! -f "/data/source/${MAP_NAME}.osm.pbf" ] && osmium extract -b "${BBOX}" /data/source/region.osm.pbf -o "/data/source/${MAP_NAME}.osm.pbf"
+
 if [ ! -d "/data/fonts/Noto Sans Regular" ]; then
     git clone --depth 1 https://github.com/korywka/fonts.pbf.git /tmp/fonts
     cp -r /tmp/fonts/* /data/fonts/ && rm -rf /tmp/fonts
@@ -125,49 +143,28 @@ fi
 
 [ ! -d "/data/styles_src/openmaptiles/.git" ] && git clone --depth 1 https://github.com/openmaptiles/osm-bright-gl-style /data/styles_src/openmaptiles
 [ ! -d "/data/styles_src/dark-matter/.git" ] && git clone --depth 1 https://github.com/openmaptiles/dark-matter-gl-style.git /data/styles_src/dark-matter
-[ ! -f "/data/openmaptiles.mbtiles" ] && java -Xmx2g -jar /app/planetiler.jar --download --osm-path="/data/source/${MAP_NAME}.osm.pbf" --output="/data/openmaptiles.mbtiles" --maxzoom=14
+
+[ ! -f "/data/openmaptiles.mbtiles" ] && java -Xmx2g -jar /app/planetiler.jar --download --osm-path="/data/source/${MAP_NAME}.osm.pbf" --output="/data/openmaptiles.mbtiles" --maxzoom=16
 
 node /app/setup_styles.js
 
-# Database Background Start
-docker-entrypoint.sh postgres &
-POSTGRES_PID=$!
-until pg_isready -h 127.0.0.1 -U o2p; do sleep 2; done
-
-# Import OSM if missing
-if ! psql -h 127.0.0.1 -U o2p -d o2p -c '\dt' | grep -q 'planet_osm_point'; then
-    echo "Importing OSM Data..."
-    osm2pgsql -d o2p -U o2p -H 127.0.0.1 -P 5432 -W "/data/source/${MAP_NAME}.osm.pbf"
+# --- Import & SQL ---
+if ! psql -h 127.0.0.1 -U $PGUSER -d $PGDB -c '\dt' | grep -q 'planet_osm_point'; then
+    osm2pgsql -d $PGDB -U $PGUSER -H 127.0.0.1 -P 5432 -W "/data/source/${MAP_NAME}.osm.pbf"
 fi
 
-# THE SCRIPTHACK: Strips out the host-side commands and runs the SQL
 if [ -d "/app/database_scripts" ]; then
     for script in /app/database_scripts/*; do
-        echo "Processing script: $script"
-        # 1. Remove bash shebangs
-        # 2. Remove 'docker compose' host commands
-        # 3. Remove heredoc markers (SQL, EOF)
-        # 4. Pipe resulting clean SQL into the local DB
-        sed -e '/^#!/d' \
-            -e 's/docker compose exec -T [^ ]* psql/psql/g' \
-            -e 's/docker-compose exec -T [^ ]* psql/psql/g' \
-            -e '/<<.*SQL/d' \
-            -e '/^SQL$/d' \
-            -e '/^EOF$/d' "$script" > /tmp/temp_run.sql
-            
-        psql -h 127.0.0.1 -U o2p -d o2p -v ON_ERROR_STOP=1 -f /tmp/temp_run.sql
+        sed -e '/^#!/d' -e 's/docker compose exec -T [^ ]* psql/psql/g' -e 's/docker-compose exec -T [^ ]* psql/psql/g' -e '/<<.*SQL/d' -e '/^SQL$/d' -e '/^EOF$/d' "$script" > /tmp/temp_run.sql
+        su - postgres -c "psql -d $PGDB -v ON_ERROR_STOP=1 -f /tmp/temp_run.sql"
         rm /tmp/temp_run.sql
     done
 fi
-
-kill $POSTGRES_PID
-wait $POSTGRES_PID
 
 chown -R ${PUID}:${PGID} /data
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 EOF
 
-# Copy the scripts as-is
 COPY ./database_scripts /app/database_scripts
 RUN chmod +x /app/entrypoint.sh
 
